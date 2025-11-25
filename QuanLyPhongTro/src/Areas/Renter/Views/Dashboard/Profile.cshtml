@@ -1,0 +1,22 @@
+﻿@model QuanLyPhongTro.src.Models.ViewModels.PersonalInfoViewModel
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+    Layout = "_LayoutRenter";
+}
+<h3 class="mb-3"><i class="fas fa-id-card me-2"></i>Thông tin cá nhân</h3>
+<div class="card shadow-sm">
+  <div class="card-body">
+    <div class="row mb-2">
+      <div class="col-md-6">Tên: <strong>@Model.Name</strong></div>
+      <div class="col-md-6">Username: <strong>@Model.Username</strong></div>
+    </div>
+    <div class="row mb-2">
+      <div class="col-md-6">CCCD: <strong>@Model.Cccd</strong></div>
+      <div class="col-md-6">S?T: <strong>@Model.Phone</strong></div>
+    </div>
+    <div class="row mb-2">
+      <div class="col-md-6">Giới tính: <strong>@Model.Gender</strong></div>
+      <div class="col-md-6">Email: <strong>@Model.Gmail</strong></div>
+    </div>
+  </div>
+</div>

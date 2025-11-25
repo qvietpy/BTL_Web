@@ -1,0 +1,54 @@
+﻿@model IEnumerable<QuanLyPhongTro.Models.Contract>
+@{
+    ViewData["Title"] = "Hợp đồng";
+    Layout = "_LayoutOwner";
+}
+<h3 class="mb-3"><i class="fas fa-file-contract me-2"></i>Hợp đồng</h3>
+@if(TempData["SuccessMessage"]!=null){<div class="alert alert-success">@TempData["SuccessMessage"]</div>}
+@if(TempData["ErrorMessage"]!=null){<div class="alert alert-danger">@TempData["ErrorMessage"]</div>}
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-light"><tr><th>Phòng</th><th>Người thuê</th><th>Bắt đầu</th><th>Kết thúc</th><th>Tiền cọc</th><th>Gia hạn thêm</th><th>Trạng thái</th><th></th></tr></thead>
+      <tbody>
+      @if(Model!=null && Model.Any()){
+        @foreach(var c in Model){
+          <tr>
+            <td>@c.IdRoomNavigation?.Name</td>
+            <td>@(c.IdRenterNavigation?.IdDetailNavigation?.Name ?? c.IdRenterNavigation?.Username)</td>
+            <td>@c.StartDate?.ToString("dd/MM/yyyy")</td>
+            <td>@c.EndDate?.ToString("dd/MM/yyyy")</td>
+            <td>@((c.Deposit??0).ToString("N0")) VND</td>
+            <td>
+              @if(c.ExtensionStatus=="Pending"){
+                <span class="badge bg-warning text-dark">@c.RequestedExtensionMonths tháng</span>
+              } else if(c.ExtensionStatus=="Approved"){
+                <span class="badge bg-success">Đã gia hạn</span>
+              } else if(c.ExtensionStatus=="Rejected"){
+                <span class="badge bg-danger">Từ chối</span>
+              } else {<span class="text-muted small">-</span>}
+            </td>
+            <td>
+              @if(c.Status=="Active"){
+                <span class="badge bg-success">Đang hiệu lực</span>
+              } else if(c.Status=="Pending"){
+                <span class="badge bg-warning text-dark">Chờ</span>
+              } else if(c.Status=="Expired"){
+                <span class="badge bg-secondary">Hết hạn</span>
+              } else {
+                <span class="badge bg-danger">@c.Status</span>
+              }
+            </td>
+            <td class="text-end">
+              @if(c.ExtensionStatus=="Pending"){
+                <form asp-area="Owner" asp-controller="Contracts" asp-action="ApproveExtension" asp-route-id="@c.Id" method="post" class="d-inline">@Html.AntiForgeryToken()<button class="btn btn-sm btn-success" title="Duyệt"><i class="fas fa-check"></i></button></form>
+                <form asp-area="Owner" asp-controller="Contracts" asp-action="RejectExtension" asp-route-id="@c.Id" method="post" class="d-inline ms-1">@Html.AntiForgeryToken()<button class="btn btn-sm btn-danger" title="Từ chối"><i class="fas fa-times"></i></button></form>
+              }
+            </td>
+          </tr>
+        }
+      } else {<tr><td colspan="8" class="text-center text-muted">Không có hợp đồng.</td></tr>}
+      </tbody>
+    </table>
+  </div>
+</div>

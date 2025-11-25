@@ -1,0 +1,121 @@
+﻿@model IEnumerable<QuanLyPhongTro.src.Models.ViewModels.RoomViewModel>
+@{
+    ViewData["Title"] = "Trang Chủ";
+    Layout = "_LayoutRenter";
+    var featured = ViewBag.FeaturedRoom as QuanLyPhongTro.src.Models.ViewModels.RoomViewModel;
+    int total = ViewBag.TotalRooms ?? 0;
+    int loaded = ViewBag.InitialLoaded ?? Model.Count();
+    bool searchMode = ViewBag.SearchMode == true;
+    bool emptySearch = ViewBag.EmptySearch == true;
+    string keyword = ViewBag.Keyword as string ?? string.Empty;
+    decimal? minPrice = ViewBag.MinPrice as decimal?;
+    decimal? maxPriceFilter = ViewBag.MaxPriceFilter as decimal?;
+    decimal maxPrice = ViewBag.MaxPrice ?? 0m;
+    decimal? minArea = ViewBag.MinArea as decimal?;
+    decimal? maxArea = ViewBag.MaxArea as decimal?;
+}
+
+@if (!searchMode && featured != null)
+{
+    <section class="mb-5">
+        <h3 class="fw-bold mb-4 text-primary"><i class="fas fa-star"></i> Phòng mới đăng</h3>
+        <div class="featured-room">
+            <div class="row g-0">
+                <div class="col-md-6">
+                    <a asp-area="Renter" asp-controller="Room" asp-action="Detail" asp-route-id="@featured.Id">
+                        <img src="@featured.MainImage" class="featured-img" alt="@featured.Name">
+                    </a>
+                </div>
+                <div class="col-md-6 p-4 d-flex flex-column justify-content-center">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h2 class="fw-bold mb-0">@featured.Name</h2>
+                        <button class="fav-btn inline-fav" data-room="@featured.Id" aria-label="Yêu thích">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                    <p class="room-price mt-2">@featured.Price.ToString("N0") VND/tháng</p>
+                    <p class="text-muted"><i class="fas fa-map-marker-alt me-2"></i> @featured.Address</p>
+                    <div class="d-flex gap-3 my-3 text-secondary">
+                        <span><i class="fas fa-vector-square"></i> @featured.Area m²</span>
+                    </div>
+                    <div class="mb-3 text-truncate-3">@featured.Description</div>
+                    <div class="mt-auto small text-muted">Chủ trọ: <strong>@featured.OwnerName</strong></div>
+                    <a asp-area="Renter" asp-controller="Room" asp-action="Detail" asp-route-id="@featured.Id" class="btn btn-primary mt-3">Xem chi tiết</a>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+<section>
+    <h3 class="fw-bold mb-4 text-dark">
+        @if (searchMode)
+        {
+            if (emptySearch) { <span>Không có phòng phù hợp với yêu cầu tìm kiếm này</span>; }
+            else { <span>Danh sách các phòng phù hợp:</span>; }
+        }
+        else { <span>Danh sách phòng trọ</span>; }
+    </h3>
+    <div class="row" id="room-grid">
+        @foreach (var room in Model)
+        {
+            <div class="col-lg-3 col-md-4 col-sm-6 room-item">
+                <div class="room-card">
+                    <div class="room-img-wrapper">
+                        <a asp-area="Renter" asp-controller="Room" asp-action="Detail" asp-route-id="@room.Id">
+                            <img src="@room.MainImage" class="room-img" alt="@room.Name">
+                        </a>
+                        <span class="room-badge"><i class="fas fa-check-circle"></i> @room.Status</span>
+                    </div>
+                    <div class="room-info">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="room-title" title="@room.Name">@room.Name</div>
+                            <button class="fav-btn inline-fav" data-room="@room.Id" aria-label="Yêu thích">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            <div class="room-price">@room.Price.ToString("N0") VND</div>
+                            <div class="text-muted small">@room.Area m²</div>
+                        </div>
+                        <div class="room-address"><i class="fas fa-map-marker-alt me-1 text-danger"></i> @room.Address</div>
+                        <div class="mt-2 small text-muted">Chủ trọ: <strong>@room.OwnerName</strong></div>
+                        <div class="mt-3 d-grid"><a asp-area="Renter" asp-controller="Room" asp-action="Detail" asp-route-id="@room.Id" class="btn btn-sm btn-outline-primary">Xem chi tiết</a></div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="text-center mt-4" id="load-more-wrapper">
+        @if (!searchMode && loaded < total)
+        {
+            <button id="btn-load-more" class="btn btn-outline-secondary px-4" data-loaded="@loaded" data-total="@total" data-keyword="@keyword" data-min="@(minPrice ?? 0)" data-max="@(maxPriceFilter ?? maxPrice)" data-minarea="@(minArea?.ToString() ?? "")" data-maxarea="@(maxArea?.ToString() ?? "")">Xem thêm</button>
+        }
+    </div>
+</section>
+
+@section Scripts {
+<style>
+.fav-btn { background:#fff; border:1px solid #dc3545; color:#dc3545; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:.2s; }
+.fav-btn.inline-fav { position:static; }
+.fav-btn.active { background:#dc3545; color:#fff; }
+.fav-btn:hover { box-shadow:0 0 0 3px rgba(220,53,69,.15); }
+</style>
+<script>
+(function(){
+    async function toggle(btn){
+        const roomId = btn.getAttribute('data-room');
+        try {
+            const res = await fetch('@Url.Action("ToggleFavorite","Room", new { area="Renter" })', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ roomId }) });
+            if(!res.ok) throw new Error();
+            const data = await res.json();
+            if(data.favorited){ btn.classList.add('active'); btn.innerHTML='<i class="fas fa-heart"></i>'; }
+            else { btn.classList.remove('active'); btn.innerHTML='<i class="far fa-heart"></i>'; }
+        } catch(e){ console.error(e); }
+    }
+    function wireFavButtons(scope=document){ scope.querySelectorAll('.fav-btn').forEach(b=>{ b.onclick=()=>toggle(b); }); }
+    wireFavButtons();
+    document.addEventListener('click', function(e){ if(e.target && e.target.id==='btn-load-more'){ setTimeout(()=>wireFavButtons(),500); } });
+})();
+</script>
+}

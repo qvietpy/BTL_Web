@@ -1,0 +1,67 @@
+﻿@{
+    Layout = "_LayoutOwner";
+    ViewData["Title"] = "Dashboard Chủ trọ";
+    var rooms = ViewBag.Rooms as List<QuanLyPhongTro.Models.Room> ?? new();
+    int totalRooms = ViewBag.TotalRooms ?? 0;
+    int rentedRooms = ViewBag.RentedRooms ?? 0;
+    int emptyRooms = ViewBag.EmptyRooms ?? 0;
+    int underMaint = ViewBag.UnderMaintenance ?? 0;
+    decimal revenue = ViewBag.MonthlyRevenue ?? 0m;
+    int activeContracts = ViewBag.ActiveContracts ?? 0;
+    int pendingRequests = ViewBag.PendingRequests ?? 0;
+}
+<h5 class="visually-hidden">Tổng quan</h5>
+<div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="card shadow-sm h-100"><div class="card-body"><h6 class="text-muted">Tổng phòng</h6><h3 class="mb-0">@totalRooms</h3></div></div></div>
+    <div class="col-md-3"><div class="card shadow-sm h-100"><div class="card-body"><h6 class="text-muted">Đã thuê</h6><h3 class="mb-0 text-success">@rentedRooms</h3></div></div></div>
+    <div class="col-md-3"><div class="card shadow-sm h-100"><div class="card-body"><h6 class="text-muted">Còn trống</h6><h3 class="mb-0 text-warning">@emptyRooms</h3></div></div></div>
+    <div class="col-md-3"><div class="card shadow-sm h-100"><div class="card-body"><h6 class="text-muted">Đang sửa chữa</h6><h3 class="mb-0 text-danger">@underMaint</h3></div></div></div>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="card shadow-sm h-100"><div class="card-body"><h6 class="text-muted">Hợp đồng hoạt động</h6><h3 class="mb-0">@activeContracts</h3></div></div></div>
+    <div class="col-md-4"><div class="card shadow-sm h-100"><div class="card-body"><h6 class="text-muted">Yêu cầu thuê chờ duyệt</h6><h3 class="mb-0">@pendingRequests</h3></div></div></div>
+    <div class="col-md-4"><div class="card shadow-sm h-100"><div class="card-body"><h6 class="text-muted">Doanh thu tháng (ước tính)</h6><h3 class="mb-0 text-info">@revenue.ToString("N0") đ</h3></div></div></div>
+</div>
+<h5 class="mt-4 mb-3">Chức năng quản lý</h5>
+<div class="row g-3 mb-4">
+    <div class="col-md-2"><a asp-area="Owner" asp-controller="Room" asp-action="Index" class="text-decoration-none"><div class="card text-center shadow-sm h-100 p-3"><div class="display-6">🏠</div><div class="small mt-2">Quản lý phòng</div></div></a></div>
+    <div class="col-md-2"><a asp-area="Owner" asp-controller="Bill" asp-action="Index" class="text-decoration-none"><div class="card text-center shadow-sm h-100 p-3"><div class="display-6">🧾</div><div class="small mt-2">Quản lý hóa đơn</div></div></a></div>
+    <div class="col-md-2"><a asp-area="Owner" asp-controller="Contracts" asp-action="Index" class="text-decoration-none"><div class="card text-center shadow-sm h-100 p-3"><div class="display-6">📑</div><div class="small mt-2">Quản lý hợp đồng</div></div></a></div>
+    <div class="col-md-2"><a asp-area="Owner" asp-controller="Booking" asp-action="Requests" class="text-decoration-none"><div class="card text-center shadow-sm h-100 p-3"><div class="display-6">📨</div><div class="small mt-2">Yêu cầu thuê</div></div></a></div>
+    <div class="col-md-2"><a asp-area="Owner" asp-controller="Notice" asp-action="Index" class="text-decoration-none"><div class="card text-center shadow-sm h-100 p-3"><div class="display-6">🔔</div><div class="small mt-2">Thông báo</div></div></a></div>
+    <div class="col-md-2"><a asp-area="Owner" asp-controller="Report" asp-action="Index" class="text-decoration-none"><div class="card text-center shadow-sm h-100 p-3"><div class="display-6">🛠️</div><div class="small mt-2">Báo cáo sự cố</div></div></a></div>
+</div>
+<h5 class="mt-4 mb-3">Danh sách phòng</h5>
+<div class="table-responsive">
+<table class="table table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>Tên phòng</th>
+            <th>Địa chỉ</th>
+            <th>Diện tích</th>
+            <th>Giá</th>
+            <th>Trạng thái</th>
+            <th>Người thuê</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach(var r in rooms){
+        var activeContract = r.Contracts.FirstOrDefault(c => c.Status=="Active");
+        <tr>
+            <td>@r.Name</td>
+            <td>@r.Address</td>
+            <td>@(r.Area ?? 0)m²</td>
+            <td>@((r.Price ?? 0)) đ</td>
+            <td>
+                @if(activeContract!=null){<span class="badge bg-success">Đã thuê</span>}
+                else if(r.Status=="Maintenance"){<span class="badge bg-secondary">Sửa chữa</span>}
+                else {<span class="badge bg-warning text-dark">Trống</span>}
+            </td>
+            <td>@(activeContract?.IdRenterNavigation?.IdDetailNavigation?.Name ?? "-")</td>
+            <td><a asp-area="Owner" asp-controller="Room" asp-action="Detail" asp-route-id="@r.Id" class="btn btn-sm btn-outline-primary">Chi tiết</a></td>
+        </tr>
+    }
+    </tbody>
+</table>
+</div>

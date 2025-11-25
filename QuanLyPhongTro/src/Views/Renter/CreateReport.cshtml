@@ -1,0 +1,91 @@
+﻿@model QuanLyPhongTro.src.Models.ViewModels.ReportViewModel
+@{
+    ViewData["Title"] = "Tạo báo cáo";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        body { background: #f5f5f5; }
+        .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .form-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            max-width: 700px;
+            margin: 30px auto;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="@Url.Action("Index", "Renter")">
+                <i class="fas fa-home me-2"></i>Quản lý Phòng Trọ
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-card">
+            <h2 class="text-center mb-4"><i class="fas fa-flag me-2"></i>Tạo báo cáo sự cố</h2>
+            
+            <form asp-action="CreateReport" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Phòng liên quan</label>
+                    <select asp-for="RoomId" class="form-select">
+                        <option value="">-- Chọn phòng (nếu có) --</option>
+                        @if (ViewBag.Rooms != null)
+                        {
+                            @foreach (var room in ViewBag.Rooms as List<QuanLyPhongTro.Models.Room>)
+                            {
+                                <option value="@room.Id">@room.Name - @room.Address</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label">Tiêu đề *</label>
+                    <input asp-for="Title" class="form-control" placeholder="Ví dụ: Điện nước bị hỏng" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Description" class="form-label">Mô tả chi tiết *</label>
+                    <textarea asp-for="Description" class="form-control" rows="6" 
+                              placeholder="Mô tả chi tiết vấn đề bạn gặp phải..."></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                @if (!string.IsNullOrEmpty(ViewData.ModelState.Root?.Errors.FirstOrDefault()?.ErrorMessage))
+                {
+                    <div class="alert alert-danger">
+                        @ViewData.ModelState.Root.Errors.First().ErrorMessage
+                    </div>
+                }
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill">
+                        <i class="fas fa-paper-plane me-2"></i>Gửi báo cáo
+                    </button>
+                    <a href="@Url.Action("MyReports", "Renter")" class="btn btn-secondary flex-fill">
+                        <i class="fas fa-times me-2"></i>Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@4.0.0/dist/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

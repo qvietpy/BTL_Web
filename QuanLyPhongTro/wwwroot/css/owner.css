@@ -1,0 +1,9 @@
+/* Basic owner dashboard styling */
+#sidebar-wrapper { width:240px; min-height:100vh; }
+#page-content-wrapper { flex:1; }
+#wrapper { min-height:100vh; }
+.list-group-item-dark { background:#222; color:#ddd; border:none; }
+.list-group-item-dark:hover { background:#343a40; color:#fff; }
+.sidebar-heading { background:#111; }
+.card { border-radius:.75rem; }
+.table th { font-weight:600; }

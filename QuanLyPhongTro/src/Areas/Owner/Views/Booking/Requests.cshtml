@@ -1,0 +1,90 @@
+﻿@model IEnumerable<QuanLyPhongTro.Models.BookingRequest>
+@{
+    ViewData["Title"] = "Yêu cầu thuê";
+    Layout = "_LayoutOwner";
+}
+<h3 class="mb-3"><i class="fas fa-inbox me-2"></i>Yêu cầu thuê</h3>
+@if(TempData["SuccessMessage"]!=null){<div class="alert alert-success">@TempData["SuccessMessage"]</div>}
+@if(TempData["ErrorMessage"]!=null){<div class="alert alert-danger">@TempData["ErrorMessage"]</div>}
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Phòng</th>
+          <th>Người thuê</th>
+          <th>Ngày bắt đầu mong muốn</th>
+          <th>Thời hạn (tháng)</th>
+          <th>Ghi chú</th>
+          <th>Trạng thái</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      @if(Model!=null && Model.Any()){
+        @foreach(var r in Model){
+          <tr>
+            <td>@r.Room?.Name</td>
+            <td>@(r.Renter?.IdDetailNavigation?.Name ?? r.Renter?.Username)</td>
+            <td>@r.DesiredStartDate.ToString("dd/MM/yyyy")</td>
+            <td>@r.DesiredDurationMonths</td>
+            <td>@r.Note</td>
+            <td>
+              @if(r.Status=="Pending"){
+                <span class="badge bg-warning text-dark">Chờ duyệt</span>
+              } else if(r.Status=="Approved"){
+                <span class="badge bg-success">Đã duyệt</span>
+              } else {
+                <span class="badge bg-danger">Từ chối</span>
+              }
+            </td>
+            <td class="text-end">
+  @if(r.Status=="Pending"){
+    <a href="/Owner/Booking/Confirm/@r.Id"
+       class="btn btn-sm btn-success confirm-link"
+       data-id="@r.Id"
+       title="Xác nhận tạo hợp đồng">
+       <i class="fas fa-check me-1"></i>Xác nhận
+    </a>
+
+    <form asp-area="Owner"
+          asp-controller="Booking"
+          asp-action="Reject"
+          method="post"
+          class="d-inline">
+
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@r.Id" />
+
+        <button type="submit"
+                class="btn btn-sm btn-danger"
+                onclick="return confirm('Bạn có chắc chắn muốn từ chối yêu cầu này?');">
+            <i class="fas fa-times me-1"></i>Từ chối
+        </button>
+
+    </form>
+  }
+</td>
+
+          </tr>
+        }
+      } else {
+        <tr><td colspan="7" class="text-center text-muted">Không có yêu cầu.</td></tr>
+      }
+      </tbody>
+    </table>
+  </div>
+</div>
+@section Scripts{
+<script>
+// Fallback: if something blocks anchor default navigate, force redirect
+// document.querySelectorAll('a.confirm-link').forEach(a=>{
+//   a.addEventListener('click', function(e){
+//     const url=this.getAttribute('href');
+//     if(!url) return; normal
+//     allow default; but if prevented by other handler, do manual redirect
+//     setTimeout(()=>{ if(location.href.indexOf(url)===-1){ window.location.href=url; } }, 50);
+//   });
+// });
+</script>
+}

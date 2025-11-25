@@ -1,0 +1,52 @@
+﻿@model IEnumerable<QuanLyPhongTro.src.Models.ViewModels.RenterContractViewModel>
+@{
+    ViewData["Title"] = "Hợp đồng của tôi";
+    Layout = "_LayoutRenter";
+}
+<h3 class="mb-3"><i class="fas fa-file-contract me-2"></i>Hợp đồng của tôi</h3>
+@if(!Model.Any()){
+  <div class="alert alert-info">Bạn chưa có hợp đồng nào được duyệt hoặc hợp đồng đã hết hạn</div>
+} else {
+  <div class="row">
+    @foreach(var c in Model){
+      var remainingDays = (c.EndDate - DateTime.Now).TotalDays;
+      var durationMonths = ((c.EndDate.Year - c.StartDate.Year)*12 + c.EndDate.Month - c.StartDate.Month);
+      var totalDays = (c.EndDate - c.StartDate).TotalDays;
+      var progress = totalDays>0 ? Math.Max(0, Math.Min(100,(int)(((totalDays - remainingDays)/totalDays)*100))) : 0;
+      <div class="col-lg-6">
+        <div class="card shadow-sm mb-3 h-100">
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start">
+              <h5 class="mb-1">@c.RoomName</h5>
+              <span class="badge @(c.Status=="Active"?"bg-success":c.Status=="Pending"?"bg-warning text-dark":c.Status=="Expired"?"bg-secondary":"bg-danger")">@c.Status</span>
+            </div>
+            <div class="text-muted mb-2 small"><i class="fas fa-map-marker-alt me-1 text-danger"></i>@c.RoomAddress</div>
+            <div class="row small mb-2">
+              <div class="col-6">Bắt đầu: <strong>@c.StartDate:dd/MM/yyyy</strong></div>
+              <div class="col-6">Kết thúc: <strong>@c.EndDate:dd/MM/yyyy</strong></div>
+            </div>
+            <div class="row small mb-2">
+              <div class="col-6">Thời hạn: <strong>@durationMonths tháng</strong></div>
+              <div class="col-6">Còn lại: <strong>@(remainingDays < 0 ? 0 : Math.Round(remainingDays)) ngày</strong></div>
+            </div>
+            <div class="mb-2">Đặt cọc: <strong class="text-danger">@c.Deposit.ToString("N0") VNĐ</strong></div>
+            <div class="progress mb-2" style="height:8px"><div class="progress-bar" role="progressbar" style="width:@progress%"></div></div>
+            <div class="small text-muted mb-2">Tiến độ: @progress%</div>
+            <div class="small text-muted mb-3">Chủ trọ: @c.OwnerName - @c.OwnerPhone</div>
+            @if(c.Status=="Active"){
+              <form asp-area="Renter" asp-controller="Contracts" asp-action="RequestExtension" method="post" class="row g-2 align-items-end mb-2">@Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@c.Id" />
+                <div class="col-7">
+                  <label class="form-label mb-1 small">Gia hạn (tháng)</label>
+                  <input type="number" name="months" min="1" max="36" class="form-control form-control-sm" required />
+                </div>
+                <div class="col-5"><button type="submit" class="btn btn-outline-success btn-sm w-100"><i class="fas fa-plus me-1"></i>Gửi yêu cầu</button></div>
+              </form>
+            }
+            <a asp-area="Renter" asp-controller="Dashboard" asp-action="Contract" class="btn btn-outline-primary btn-sm mt-auto"><i class="fas fa-eye me-1"></i>Chi tiết</a>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}

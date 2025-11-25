@@ -1,0 +1,33 @@
+﻿@{
+    ViewData["Title"] = "Tạo hóa đơn";
+    Layout = "_LayoutOwner";
+    var rooms = ViewBag.Rooms as List<QuanLyPhongTro.Models.Room> ?? new();
+    var renters = ViewBag.Renters as List<QuanLyPhongTro.Models.Person> ?? new();
+}
+<h3 class="mb-3"><i class="bi bi-plus-circle me-2"></i>Tạo hóa đơn</h3>
+<form asp-action="Create" method="post" class="card shadow-sm">
+  @Html.AntiForgeryToken()
+  <div class="card-body">
+    <div class="mb-3">
+      <label class="form-label">Phòng</label>
+      <select name="roomId" class="form-select" required>
+        <option value="">-- Chọn phòng --</option>
+        @foreach(var r in rooms){ <option value="@r.Id">@r.Name (@r.Address)</option> }
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Người thuê</label>
+      <select name="renterId" class="form-select" required>
+        <option value="">-- Chọn người thuê --</option>
+        @foreach(var p in renters){ <option value="@p.Id">@(p.IdDetailNavigation?.Name ?? p.Username)</option> }
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Tổng tiền (VND)</label>
+      <input type="number" name="totalMoney" class="form-control" min="0" step="1000" required />
+      @if(!ViewData.ModelState.IsValid){ <div class="text-danger small">@ViewData.ModelState[string.Empty]?.Errors.FirstOrDefault()?.ErrorMessage</div> }
+    </div>
+    <button type="submit" class="btn btn-success">Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary ms-2">Hủy</a>
+  </div>
+</form>

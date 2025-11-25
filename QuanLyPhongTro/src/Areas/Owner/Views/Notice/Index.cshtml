@@ -1,0 +1,33 @@
+﻿@model IEnumerable<QuanLyPhongTro.Models.Notice>
+@{
+    ViewData["Title"] = "Thông báo";
+    Layout = "_LayoutOwner";
+}
+<h3 class="mb-3"><i class="fas fa-bell me-2"></i>Thông báo</h3>
+@if(TempData["SuccessMessage"]!=null){<div class="alert alert-success">@TempData["SuccessMessage"]</div>}
+<div class="mb-3 text-end">
+  <a asp-area="Owner" asp-controller="Notice" asp-action="Create" class="btn btn-primary"><i class="fas fa-plus me-1"></i>Tạo thông báo</a>
+</div>
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-light"><tr><th>Tiêu đề</th><th>Ngày tạo</th><th>Trạng thái</th><th></th></tr></thead>
+      <tbody>
+      @if(Model!=null && Model.Any()){
+        @foreach(var n in Model){
+          <tr>
+            <td>@n.Title</td>
+            <td>@n.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+            <td>@n.Status</td>
+            <td class="text-end">
+              @if(n.Status=="Ch?a ??c"){
+                <form asp-area="Owner" asp-controller="Notice" asp-action="MarkRead" method="post" class="d-inline">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@n.Id" /><button class="btn btn-sm btn-success">Đánh dấu đã đọc</button></form>
+              }
+            </td>
+          </tr>
+        }
+      } else {<tr><td colspan="4" class="text-center text-muted">Không có thông báo.</td></tr>}
+      </tbody>
+    </table>
+  </div>
+</div>

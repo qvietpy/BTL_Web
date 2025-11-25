@@ -1,0 +1,38 @@
+﻿@model QuanLyPhongTro.src.Models.ViewModels.ContractDetailViewModel
+@{
+    ViewData["Title"] = "Chi tiết hợp đồng";
+    Layout = "_LayoutRenter";
+}
+<h3 class="mb-3"><i class="fas fa-file-contract me-2"></i>Chi tiết hợp đồng</h3>
+@if(TempData["SuccessMessage"]!=null){<div class="alert alert-success">@TempData["SuccessMessage"]</div>}
+@if(TempData["ErrorMessage"]!=null){<div class="alert alert-danger">@TempData["ErrorMessage"]</div>}
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h5>@Model.RoomName</h5>
+    <p class="text-muted"><i class="fas fa-map-marker-alt me-1 text-danger"></i>@Model.RoomAddress</p>
+    <div class="row small mb-2">
+      <div class="col-md-3">Giá thuê: <strong>@Model.Price?.ToString("N0") VND</strong></div>
+      <div class="col-md-3">Diện tích: <strong>@Model.Area m²</strong></div>
+      <div class="col-md-3">Bắt đầu: <strong>@Model.Start?.ToString("dd/MM/yyyy")</strong></div>
+      <div class="col-md-3">Kết thúc: <strong>@Model.End?.ToString("dd/MM/yyyy")</strong></div>
+    </div>
+    <p class="mb-1">Đặt cọc: <strong>@Model.Deposit?.ToString("N0") VND</strong></p>
+    <p class="mb-1">Trạng thái: <span class="badge bg-primary">@Model.Status</span></p>
+    <hr />
+    <h6>Chủ trọ</h6>
+    <p class="mb-1"><i class="fas fa-user me-1"></i>@Model.OwnerName</p>
+    <p class="mb-3"><i class="fas fa-phone me-1"></i>@Model.OwnerPhone</p>
+    <h6 class="mb-2">Gia hạn hợp đồng</h6>
+    <form asp-area="Renter" asp-controller="Contracts" asp-action="RequestExtension" method="post" class="row g-2 align-items-end" style="max-width:340px">@Html.AntiForgeryToken()
+      <input type="hidden" name="id" value="@Model.Id" />
+      <div class="col-7">
+        <label class="form-label mb-1">Số tháng muốn gia hạn</label>
+        <input type="number" name="months" min="1" max="36" class="form-control form-control-sm" required />
+      </div>
+      <div class="col-5">
+        <button type="submit" class="btn btn-sm btn-outline-success w-100"><i class="fas fa-plus me-1"></i>Gửi yêu cầu</button>
+      </div>
+    </form>
+    <div class="form-text mt-1 small">Yêu cầu sẽ gửi đến chủ trọ chờ duyệt</div>
+  </div>
+</div>

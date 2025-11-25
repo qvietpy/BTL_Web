@@ -1,0 +1,205 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Chủ - Tìm Phòng Trọ Nhanh</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="~/css/renter-style.css" rel="stylesheet" />
+</head>
+<body>
+    <header class="main-header d-flex align-items-center">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-3 col-4">
+                    <a asp-area="Renter" asp-controller="Home" asp-action="Index"><img src="https://placehold.co/200x50/png?text=LOGO+NHA+TRO" alt="Logo" class="logo-img"></a>
+                </div>
+                <div class="col-md-6 col-8">
+                    <div class="search-bar-container">
+                        <i class="fas fa-search text-muted ms-2"></i>
+                        <input id="header-search" type="text" class="search-input" placeholder="Tìm theo quận, tên đường..." autocomplete="off">
+                        <div class="d-none d-md-flex gap-2">
+                            <select id="header-price" class="form-select form-select-sm border-0 bg-light" style="width: 110px;">
+                                <option value="">Mức giá</option>
+                                <option value="1000000">< 1 triệu</option>
+                                <option value="3000000">1 - 3 triệu</option>
+                                <option value="5000000">> 3 triệu</option>
+                            </select>
+                            <select id="header-area" class="form-select form-select-sm border-0 bg-light" style="width: 120px;">
+                                <option value="">Diện tích</option>
+                                <option value="A_LT20">Dưới 20m²</option>
+                                <option value="A_20_50">20 - 50m²</option>
+                                <option value="A_GT50">Trên 50m²</option>
+                            </select>
+                            <button id="header-reset" class="btn btn-sm btn-primary" title="Làm mới"><i class="fas fa-sync-alt"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 d-none d-md-flex justify-content-end gap-3">
+                    <button id="btn-favorites" type="button" class="btn btn-outline-danger position-relative">
+                        <i class="far fa-heart me-1"></i> Tin đã lưu
+                        <span id="fav-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+                    </button>
+                    @if (User?.Identity?.IsAuthenticated ?? false)
+                    {
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user me-1"></i>@User.Identity!.Name
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow">
+                                <li><a class="dropdown-item" asp-area="Renter" asp-controller="Dashboard" asp-action="Contract"><i class="fas fa-file-contract me-2"></i>Hợp đồng</a></li>
+                                <li><a class="dropdown-item" asp-area="Renter" asp-controller="Dashboard" asp-action="Profile"><i class="fas fa-id-card me-2"></i>Thông tin cá nhân</a></li>
+                                <li><a class="dropdown-item" asp-area="Renter" asp-controller="Dashboard" asp-action="SendNotice"><i class="fas fa-paper-plane me-2"></i>Gửi thông báo</a></li>
+                                <li><a class="dropdown-item" asp-area="Renter" asp-controller="Contracts" asp-action="My"><i class="fas fa-list me-2"></i>Hợp đồng của tôi</a></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <form asp-area="Renter" asp-controller="Auth" asp-action="Logout" method="post" class="px-3">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-link text-danger p-0"><i class="fas fa-sign-out-alt me-1"></i>Đăng xuất</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <a asp-controller="Auth" asp-action="Login" class="btn btn-primary"><i class="fas fa-sign-in-alt me-1"></i>Đăng nhập</a>
+                    }
+                </div>
+            </div>
+            @if (User?.Identity?.IsAuthenticated ?? false)
+            {
+                <div class="row mt-2 d-md-none">
+                    <div class="col-12">
+                        <div class="btn-group w-100" role="group">
+                            <a asp-area="Renter" asp-controller="Dashboard" asp-action="Contract" class="btn btn-outline-secondary btn-sm"><i class="fas fa-file-contract"></i></a>
+                            <a asp-area="Renter" asp-controller="Dashboard" asp-action="Profile" class="btn btn-outline-secondary btn-sm"><i class="fas fa-id-card"></i></a>
+                            <a asp-area="Renter" asp-controller="Dashboard" asp-action="SendNotice" class="btn btn-outline-secondary btn-sm"><i class="fas fa-paper-plane"></i></a>
+                            <a asp-area="Renter" asp-controller="Contracts" asp-action="My" class="btn btn-outline-secondary btn-sm"><i class="fas fa-list"></i></a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </header>
+
+    <main class="container py-4">
+        @RenderBody()
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5 class="fw-bold mb-3">Về chúng tôi</h5>
+                    <p class="small">Hệ thống quản lý và cho thuê phòng trọ hàng đầu. Kết nối chủ trọ và người thuê nhanh chóng, tiện lợi.</p>
+                    <div class="mt-3">
+                        <a href="#"><img src="https://placehold.co/30x30/png?text=T" alt="TikTok" class="social-icon rounded"></a>
+                        <a href="#"><img src="https://placehold.co/30x30/png?text=F" alt="Facebook" class="social-icon rounded"></a>
+                        <a href="#"><img src="https://placehold.co/30x30/png?text=Y" alt="YouTube" class="social-icon rounded"></a>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5 class="fw-bold mb-3">Liên kết nhanh</h5>
+                    <a asp-area="Renter" asp-controller="Home" asp-action="Index" class="footer-link">Trang chủ</a>
+                    <a asp-area="Renter" asp-controller="Contracts" asp-action="My" class="footer-link">Hợp đồng của tôi</a>
+                    <a asp-area="Renter" asp-controller="Dashboard" asp-action="Profile" class="footer-link">Thông tin cá nhân</a>
+                    <a asp-area="Renter" asp-controller="Dashboard" asp-action="SendNotice" class="footer-link">Gửi thông báo</a>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5 class="fw-bold mb-3">Liên hệ</h5>
+                    <p class="mb-2"><i class="fas fa-phone-alt me-2"></i> Hotline: 1900 1234</p>
+                    <p class="mb-2"><i class="fas fa-envelope me-2"></i> Email: support@phongtro.com</p>
+                    <p><i class="fas fa-map-marker-alt me-2"></i> VP: Quận 1, TP.HCM</p>
+                </div>
+            </div>
+            <hr class="border-secondary">
+            <div class="text-center small text-muted">&copy; 2024 QuanLyPhongTro. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <button type="button" id="btn-back-to-top"><i class="fas fa-arrow-up"></i></button>
+
+    <!-- Favorites Modal -->
+    <div class="modal fade" id="favoritesModal" tabindex="-1" aria-labelledby="favoritesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="favoritesModalLabel">Phòng yêu thích</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="favorites-list" class="row g-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/renter-script.js"></script>
+    <script>
+    (function(){
+        const input = document.getElementById('header-search');
+        const priceSelect = document.getElementById('header-price');
+        const areaSelect = document.getElementById('header-area');
+        const resetBtn = document.getElementById('header-reset');
+        const favBtn = document.getElementById('btn-favorites');
+        const favCount = document.getElementById('fav-count');
+        let debounceTimer; const delay = 400;
+
+        function currentPriceRange(){ const v=priceSelect.value; if(!v) return {min:null,max:null}; const n=parseInt(v); if(n===1000000) return {min:0,max:1000000}; if(n===3000000) return {min:1000000,max:3000000}; if(n===5000000) return {min:3000000,max:null}; return {min:null,max:null}; }
+        function currentAreaRange(){ const v=areaSelect.value; if(!v) return {min:null,max:null}; if(v==='A_LT20') return {min:0,max:20}; if(v==='A_20_50') return {min:20,max:50}; if(v==='A_GT50') return {min:50,max:null}; return {min:null,max:null}; }
+
+        async function loadFavorites(markHearts=true){
+            try{ const res=await fetch('@Url.Action("Favorites","Room", new { area="Renter" })'); if(!res.ok) return; const data=await res.json(); const items=data.items||[]; favCount.textContent=items.length; const list=document.getElementById('favorites-list'); if(list){ list.innerHTML=''; items.forEach(r=>{ const col=document.createElement('div'); col.className='col-md-3'; col.innerHTML=`<div class="border rounded p-2 h-100 d-flex flex-column"><img src="${r.image}" class="img-fluid mb-2" alt="${r.name}"><div class="fw-semibold small" title="${r.name}">${r.name}</div><div class="text-danger small">${Number(r.price||0).toLocaleString('vi-VN')} VND</div><div class="text-muted small">${r.area||0} m²</div></div>`; list.appendChild(col); }); if(items.length===0) list.innerHTML='<div class="col-12 text-muted">Chưa có phòng yêu thích.</div>'; } if(markHearts){ const ids=new Set(items.map(r=>r.id)); document.querySelectorAll('.fav-btn').forEach(btn=>{ const id=btn.getAttribute('data-room'); if(ids.has(id)){ btn.classList.add('active'); btn.innerHTML='<i class="fas fa-heart"></i>'; } }); } }catch(e){ console.error(e); }
+        }
+
+        favBtn?.addEventListener('click', async ()=>{ await loadFavorites(); new bootstrap.Modal(document.getElementById('favoritesModal')).show(); });
+        window.addEventListener('favorites-changed', ()=>loadFavorites(false));
+
+        function wireFavButtons(scope=document){ scope.querySelectorAll('.fav-btn').forEach(b=>{ b.onclick=async()=>{ const roomId=b.getAttribute('data-room'); try{ const res=await fetch('@Url.Action("ToggleFavorite","Room", new { area="Renter" })',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({roomId})}); if(!res.ok) throw 0; const data=await res.json(); if(data.favorited){ b.classList.add('active'); b.innerHTML='<i class="fas fa-heart"></i>'; } else { b.classList.remove('active'); b.innerHTML='<i class="far fa-heart"></i>'; } window.dispatchEvent(new CustomEvent('favorites-changed')); }catch(e){ console.error(e); } }; }); }
+
+        function setupLoadMore(){
+            const btn=document.getElementById('btn-load-more');
+            if(!btn) return;
+            const clone=btn.cloneNode(true); btn.replaceWith(clone);
+            clone.addEventListener('click', async ()=>{
+                const loaded=parseInt(clone.getAttribute('data-loaded')); const total=parseInt(clone.getAttribute('data-total'));
+                if(loaded>=total){ finalizeNoMore(clone); return; }
+                const keyword=clone.getAttribute('data-keyword')||'';
+                const min=clone.getAttribute('data-min'); const max=clone.getAttribute('data-max');
+                const minA=clone.getAttribute('data-minarea'); const maxA=clone.getAttribute('data-maxarea');
+                const url=`@Url.Action("LoadMore","Home", new { area="Renter" })?skip=${loaded}&keyword=${encodeURIComponent(keyword)}&minPrice=${min}&maxPrice=${max}&minArea=${minA}&maxArea=${maxA}`;
+                clone.disabled=true; clone.innerHTML='Đang tải...';
+                try{ const res=await fetch(url); if(!res.ok) throw 0; const data=await res.json(); if(!data || data.count===0){ finalizeNoMore(clone); return; }
+                    const grid=document.getElementById('room-grid'); data.items.forEach(r=>{ const card=document.createElement('div'); card.className='col-lg-3 col-md-4 col-sm-6 room-item'; card.innerHTML=`<div class=\"room-card\"><div class=\"room-img-wrapper\"><a href=\"/Renter/Room/Detail/${r.id}\"><img src=\"${r.mainImage}\" class=\"room-img\" alt=\"${r.name}\"/></a><span class=\"room-badge\"><i class=\"fas fa-check-circle\"></i> ${r.status}</span></div><div class=\"room-info\"><div class=\"d-flex justify-content-between align-items-start\"><div class=\"room-title\" title=\"${r.name}\">${r.name}</div><button class=\"fav-btn inline-fav\" data-room=\"${r.id}\"><i class=\"far fa-heart\"></i></button></div><div class=\"d-flex justify-content-between align-items-center mt-1\"><div class=\"room-price\">${Number(r.price).toLocaleString('vi-VN')} VND</div><div class=\"text-muted small\">${r.area} m²</div></div><div class=\"room-address\"><i class=\"fas fa-map-marker-alt me-1 text-danger\"></i> ${r.address ?? ''}</div><div class=\"mt-2 small text-muted\">Chủ trọ: <strong>${r.ownerName}</strong></div><div class=\"mt-3 d-grid\"><a href="/Renter/Room/Detail/${r.id}" class="btn btn-sm btn-outline-primary">Xem chi tiết</a></div></div></div>`; grid.appendChild(card); });
+                    const newLoaded=loaded+data.count; clone.setAttribute('data-loaded', newLoaded); wireFavButtons(); loadFavorites(false); if(newLoaded>=total) finalizeNoMore(clone); else { clone.disabled=false; clone.innerHTML='Xem thêm'; }
+                }catch(e){ console.error(e); clone.disabled=false; clone.innerHTML='Thử lại'; }
+            });
+        }
+        function finalizeNoMore(btn){ btn.disabled=true; btn.classList.remove('btn-outline-secondary'); btn.classList.add('btn-secondary'); btn.innerHTML='Đã xem hết'; }
+
+        async function performFilter(){
+            const k=input.value.trim(); const price=currentPriceRange(); const area=currentAreaRange(); const params=new URLSearchParams();
+            if(k) params.append('keyword',k); if(price.min!=null) params.append('minPrice',price.min); if(price.max!=null) params.append('maxPrice',price.max); if(area.min!=null) params.append('minArea',area.min); if(area.max!=null) params.append('maxArea',area.max);
+            const url='@Url.Action("Filter","Home", new { area="Renter" })?'+params.toString();
+            try{ const res=await fetch(url); if(!res.ok) return; const data=await res.json(); const grid=document.getElementById('room-grid'); if(!grid) return; grid.innerHTML=''; const title=document.querySelector('h3.fw-bold.mb-4.text-dark'); const feat=document.querySelector('.featured-room'); if(feat) feat.closest('section').style.display='none';
+                if(data.items.length===0){ if(title) title.innerHTML='Không có phòng phù hợp với yêu cầu tìm kiếm này'; grid.innerHTML='<div class="col-12 text-muted">Không có phòng phù hợp với yêu cầu tìm kiếm này</div>'; const lw=document.getElementById('load-more-wrapper'); if(lw) lw.innerHTML=''; return; }
+                if(title) title.innerHTML='Danh sách các phòng phù hợp:';
+                data.items.forEach(r=>{ const card=document.createElement('div'); card.className='col-lg-3 col-md-4 col-sm-6 room-item'; card.innerHTML=`<div class=\"room-card\"><div class=\"room-img-wrapper\"><a href=\"/Renter/Room/Detail/${r.id}\"><img src=\"${r.mainImage}\" class=\"room-img\" alt=\"${r.name}\"/></a><span class=\"room-badge\"><i class=\"fas fa-check-circle\"></i> ${r.status}</span></div><div class=\"room-info\"><div class=\"d-flex justify-content-between align-items-start\"><div class=\"room-title\" title=\"${r.name}\">${r.name}</div><button class=\"fav-btn inline-fav\" data-room=\"${r.id}\"><i class=\"far fa-heart\"></i></button></div><div class=\"d-flex justify-content-between align-items-center mt-1\"><div class=\"room-price\">${Number(r.price).toLocaleString('vi-VN')} VND</div><div class=\"text-muted small\">${r.area} m²</div></div><div class=\"room-address\"><i class=\"fas fa-map-marker-alt me-1 text-danger\"></i> ${r.address ?? ''}</div><div class=\"mt-2 small text-muted\">Chủ trọ: <strong>${r.ownerName}</strong></div><div class=\"mt-3 d-grid\"><a href="/Renter/Room/Detail/${r.id}" class="btn btn-sm btn-outline-primary">Xem chi tiết</a></div></div></div>`; grid.appendChild(card); });
+                const lw=document.getElementById('load-more-wrapper'); if(lw){ if(data.total>data.items.length){ lw.innerHTML=`<button id="btn-load-more" class="btn btn-outline-secondary px-4" data-loaded="${data.items.length}" data-total="${data.total}" data-keyword="${k}" data-min="${price.min ?? ''}" data-max="${price.max ?? ''}" data-minarea="${area.min ?? ''}" data-maxarea="${area.max ?? ''}">Xem thêm</button>`; setupLoadMore(); } else lw.innerHTML=''; }
+                wireFavButtons(grid); loadFavorites(false);
+            }catch(e){ console.error(e); }
+        }
+
+        function schedule(){ clearTimeout(debounceTimer); debounceTimer=setTimeout(performFilter,delay); }
+        input.addEventListener('input', schedule); priceSelect.addEventListener('change', performFilter); areaSelect.addEventListener('change', performFilter); resetBtn.addEventListener('click', e=>{ e.preventDefault(); input.value=''; priceSelect.value=''; areaSelect.value=''; performFilter(); });
+
+        // initial wiring
+        wireFavButtons(); loadFavorites(); setupLoadMore();
+    })();
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

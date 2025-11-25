@@ -1,0 +1,63 @@
+﻿@model IEnumerable<QuanLyPhongTro.Models.Room>
+@{
+    ViewData["Title"] = "Quản lý Phòng";
+    Layout = "_LayoutOwner";
+}
+<h3 class="mb-3"><i class="fas fa-door-open me-2"></i>Quản lý Phòng</h3>
+@if(TempData["SuccessMessage"]!=null){<div class="alert alert-success">@TempData["SuccessMessage"]</div>}
+@if(TempData["ErrorMessage"]!=null){<div class="alert alert-danger">@TempData["ErrorMessage"]</div>}
+<div class="mb-3 text-end">
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addRoomModal"><i class="fas fa-plus-circle me-1"></i>Thêm phòng</button>
+</div>
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Tên phòng</th><th>Địa chỉ</th><th>Diện tích</th><th>Giá</th><th>Trạng thái</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+      @if(Model!=null && Model.Any()){
+        @foreach(var r in Model){
+          var active = r.Contracts.FirstOrDefault(c=>c.Status=="Active");
+          <tr>
+            <td>@r.Name</td>
+            <td>@r.Address</td>
+            <td>@(r.Area??0)m²</td>
+            <td>@((r.Price??0).ToString("N0")) VND</td>
+            <td>
+              @if(active!=null){<span class="badge bg-success">Đã thuê</span>}
+              else if(r.Status=="Maintenance"){<span class="badge bg-secondary">Sửa chữa</span>}
+              else {<span class="badge bg-warning text-dark">Trống</span>}
+            </td>
+            <td class="text-end">
+              <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editRoomModal" data-id="@r.Id"><i class="fas fa-edit"></i></button>
+              <form asp-area="Owner" asp-controller="Room" asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Xóa phòng này?');">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@r.Id" /><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></form>
+            </td>
+          </tr>
+        }
+      } else {<tr><td colspan="6" class="text-center text-muted">Chưa có phòng.</td></tr>}
+      </tbody>
+    </table>
+  </div>
+</div>
+@{ await Html.RenderPartialAsync("_AddRoomModal"); await Html.RenderPartialAsync("_EditRoomModal"); }
+@section Scripts{
+<script>
+(function(){
+  const modal=document.getElementById('editRoomModal');
+  modal.addEventListener('show.bs.modal', async ev=>{
+     const btn=ev.relatedTarget; if(!btn) return; const id=btn.getAttribute('data-id');
+     try{ const res=await fetch('@Url.Action("GetRoomDetails","Room", new { area="Owner" })?id='+id); if(!res.ok) return; const data=await res.json();
+       document.getElementById('edit_roomId').value=data.id;
+       document.getElementById('edit_roomName').value=data.name;
+       document.getElementById('edit_roomAddress').value=data.address??'';
+       document.getElementById('edit_roomArea').value=data.area??'';
+       document.getElementById('edit_roomPrice').value=data.price??'';
+       document.getElementById('edit_roomStatus').value=data.status??'Empty';
+       document.getElementById('edit_roomDescription').value=data.description??'';
+    }catch(e){console.error(e);} });
+})();
+</script>
+}
