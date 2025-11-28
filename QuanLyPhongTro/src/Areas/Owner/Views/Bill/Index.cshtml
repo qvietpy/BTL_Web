@@ -1,39 +1,98 @@
 ﻿@model IEnumerable<QuanLyPhongTro.Models.Bill>
+
 @{
     ViewData["Title"] = "Quản lý Hóa Đơn";
     Layout = "_LayoutOwner";
 }
-<h3 class="mb-3"><i class="bi bi-receipt-cutoff me-2"></i>Quản lý Hóa Đơn</h3>
-@if(TempData["SuccessMessage"]!=null){<div class="alert alert-success">@TempData["SuccessMessage"]</div>}
-@if(TempData["ErrorMessage"]!=null){<div class="alert alert-danger">@TempData["ErrorMessage"]</div>}
+
+<h3 class="mb-3">
+    <i class="bi bi-receipt-cutoff me-2"></i>Quản lý Hóa Đơn
+</h3>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
 <div class="d-flex justify-content-end gap-2 mb-3">
-  <a asp-action="Create" class="btn btn-success"><i class="bi bi-plus-circle me-1"></i>Tạo hóa đơn thủ công</a>
-  <form asp-action="GenerateAll" method="post" class="d-inline">@Html.AntiForgeryToken()<button class="btn btn-outline-primary"><i class="bi bi-magic me-1"></i>Tạo tất cả tháng này</button></form>
-  <form asp-action="SendAll" method="post" class="d-inline" onsubmit="return confirm('Gửi tất cả hóa đơn chưa thanh toán?');">@Html.AntiForgeryToken()<button class="btn btn-outline-warning"><i class="bi bi-send me-1"></i>Gửi hóa đơn</button></form>
+    <!-- Tạo hóa đơn thủ công -->
+    <a href="/Owner/Bill/Create" class="btn btn-success">
+        <i class="bi bi-plus-circle me-1"></i>Tạo hóa đơn thủ công
+    </a>
+
+    <!-- Tạo tất cả hóa đơn cho tháng -->
+    <form asp-action="GenerateAll" method="post" class="d-inline">
+        @Html.AntiForgeryToken()
+        <button class="btn btn-outline-primary">
+            <i class="bi bi-magic me-1"></i>Tạo tất cả tháng này
+        </button>
+    </form>
+
+    <!-- Gửi tất cả hóa đơn chưa thanh toán -->
+    <form asp-action="SendAll" method="post" class="d-inline"
+          onsubmit="return confirm('Gửi tất cả hóa đơn chưa thanh toán?');">
+        @Html.AntiForgeryToken()
+        <button class="btn btn-outline-warning">
+            <i class="bi bi-send me-1"></i>Gửi hóa đơn
+        </button>
+    </form>
 </div>
+
 <div class="card shadow-sm">
-  <div class="table-responsive">
-    <table class="table table-hover align-middle">
-      <thead class="table-light"><tr><th>Phòng</th><th>Người thuê</th><th>Tổng tiền</th><th>Trạng thái</th><th>Ngày tạo</th><th>Ngày thanh toán</th><th></th></tr></thead>
-      <tbody>
-      @if(Model!=null && Model.Any()){
-        @foreach(var b in Model){
-          <tr class="@(b.Status=="Pending"?"table-warning": b.Status=="Đã thanh toán"?"table-success":"")">
-            <td>@b.IdRoomNavigation?.Name</td>
-            <td>@(b.IdPersonNavigation?.IdDetailNavigation?.Name ?? b.IdPersonNavigation?.Username)</td>
-            <td>@((b.TotalMoney??0).ToString("N0")) đ</td>
-            <td>@b.Status</td>
-            <td>@b.DateCreated.ToString("dd/MM/yyyy")</td>
-            <td>@(b.PaymentDate?.ToString("dd/MM/yyyy") ?? "-")</td>
-            <td class="text-end">
-              @if(b.Status!="Đã thanh toán"){
-                <form asp-action="MarkPaid" method="post" class="d-inline">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@b.Id" /><button class="btn btn-sm btn-primary">Đánh dấu</button></form>
-              }
-            </td>
-          </tr>
-        }
-      } else {<tr><td colspan="7" class="text-center text-muted">Chưa có hóa đơn.</td></tr>}
-      </tbody>
-    </table>
-  </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Phòng</th>
+                    <th>Người thuê</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                    <th>Ngày thanh toán</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var b in Model)
+                    {
+                        var rowClass = b.Status == "Pending" ? "table-warning"
+                        : b.Status == "Đã thanh toán" ? "table-success"
+                        : "";
+
+                        <tr class="@rowClass">
+                            <td>@b.IdRoomNavigation?.Name</td>
+                            <td>@(b.IdPersonNavigation?.IdDetailNavigation?.Name ?? b.IdPersonNavigation?.Username)</td>
+                            <td>@((b.TotalMoney ?? 0).ToString("N0")) đ</td>
+                            <td>@b.Status</td>
+                            <td>@b.DateCreated.ToString("dd/MM/yyyy")</td>
+                            <td>@(b.PaymentDate?.ToString("dd/MM/yyyy") ?? "-")</td>
+                            <td class="text-end">
+                                @if (b.Status != "Đã thanh toán")
+                                {
+                                    <form asp-action="MarkPaid" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@b.Id" />
+                                        <button class="btn btn-sm btn-primary">Đánh dấu</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">Chưa có hóa đơn.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>

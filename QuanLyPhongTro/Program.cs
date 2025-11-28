@@ -6,14 +6,16 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
+// Load configuration
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true);
 
+// Add DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString)
+);
 
 // Register application services
 builder.Services.AddScoped<RoomService>();
@@ -26,19 +28,24 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Account/Denied";
     });
 
-builder.Services.AddSession(options => { options.IdleTimeout = TimeSpan.FromMinutes(30); });
-
-// Add services to the container with custom Razor view locations to include the 'src' folder
-builder.Services.AddControllersWithViews().AddRazorOptions(options =>
+// Add session support
+builder.Services.AddSession(options =>
 {
-    // Views (non-area)
-    options.ViewLocationFormats.Add("/src/Views/{1}/{0}.cshtml");
-    options.ViewLocationFormats.Add("/src/Views/Shared/{0}.cshtml");
-
-    // Areas
-    options.AreaViewLocationFormats.Add("/src/Areas/{2}/Views/{1}/{0}.cshtml");
-    options.AreaViewLocationFormats.Add("/src/Areas/{2}/Views/Shared/{0}.cshtml");
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
 });
+
+// Add MVC with custom Razor view locations to include 'src' folder
+builder.Services.AddControllersWithViews()
+    .AddRazorOptions(options =>
+    {
+        // Views (non-area)
+        options.ViewLocationFormats.Add("/src/Views/{1}/{0}.cshtml");
+        options.ViewLocationFormats.Add("/src/Views/Shared/{0}.cshtml");
+
+        // Areas
+        options.AreaViewLocationFormats.Add("/src/Areas/{2}/Views/{1}/{0}.cshtml");
+        options.AreaViewLocationFormats.Add("/src/Areas/{2}/Views/Shared/{0}.cshtml");
+    });
 
 var app = builder.Build();
 
@@ -49,11 +56,10 @@ using (var scope = app.Services.CreateScope())
     await DbSeeder.SeedAsync(db);
 }
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -61,7 +67,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -69,11 +74,14 @@ app.UseAuthorization();
 // Enable area routing first
 app.MapControllerRoute(
     name: "areas",
-    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+);
+
 
 // Default route to the existing Renter area Home/Index
 app.MapControllerRoute(
     name: "default",
-    pattern: "{area=Renter}/{controller=Home}/{action=Index}/{id?}");
+    pattern: "{area=Renter}/{controller=Home}/{action=Index}/{id?}"
+);
 
 app.Run();
