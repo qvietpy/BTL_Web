@@ -13,7 +13,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-3 col-4">
-                    <a asp-area="Renter" asp-controller="Home" asp-action="Index"><img src="https://placehold.co/200x50/png?text=LOGO+NHA+TRO" alt="Logo" class="logo-img"></a>
+                    <a asp-area="Renter" asp-controller="Home" asp-action="Index"><img src="/images/Logo.png" alt="Logo" class="logo-img"></a>
                 </div>
                 <div class="col-md-6 col-8">
                     <div class="search-bar-container">
@@ -31,6 +31,18 @@
                                 <option value="A_LT20">Dưới 20m²</option>
                                 <option value="A_20_50">20 - 50m²</option>
                                 <option value="A_GT50">Trên 50m²</option>
+                            </select>
+                            <!-- New: Owner name filter -->
+                            <input id="header-owner" type="text" class="form-control form-control-sm bg-light border-0" placeholder="Tên chủ trọ" style="width: 140px;" />
+                            <!-- New: Max occupants filter -->
+                            <select id="header-occupants" class="form-select form-select-sm border-0 bg-light" style="width: 140px;">
+                                <option value="">Số người tối đa</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value=">5">> 5</option>
                             </select>
                             <button id="header-reset" class="btn btn-sm btn-primary" title="Làm mới"><i class="fas fa-sync-alt"></i></button>
                         </div>
@@ -143,6 +155,8 @@
         const input = document.getElementById('header-search');
         const priceSelect = document.getElementById('header-price');
         const areaSelect = document.getElementById('header-area');
+        const ownerInput = document.getElementById('header-owner');
+        const occSelect = document.getElementById('header-occupants');
         const resetBtn = document.getElementById('header-reset');
         const favBtn = document.getElementById('btn-favorites');
         const favCount = document.getElementById('fav-count');
@@ -150,6 +164,7 @@
 
         function currentPriceRange(){ const v=priceSelect.value; if(!v) return {min:null,max:null}; const n=parseInt(v); if(n===1000000) return {min:0,max:1000000}; if(n===3000000) return {min:1000000,max:3000000}; if(n===5000000) return {min:3000000,max:null}; return {min:null,max:null}; }
         function currentAreaRange(){ const v=areaSelect.value; if(!v) return {min:null,max:null}; if(v==='A_LT20') return {min:0,max:20}; if(v==='A_20_50') return {min:20,max:50}; if(v==='A_GT50') return {min:50,max:null}; return {min:null,max:null}; }
+        function currentOccupants(){ const v=occSelect.value; if(!v) return null; if(v==='>5') return 6; const n=parseInt(v); return isNaN(n)? null : n; }
 
         async function loadFavorites(markHearts=true){
             try{ const res=await fetch('@Url.Action("Favorites","Room", new { area="Renter" })'); if(!res.ok) return; const data=await res.json(); const items=data.items||[]; favCount.textContent=items.length; const list=document.getElementById('favorites-list'); if(list){ list.innerHTML=''; items.forEach(r=>{ const col=document.createElement('div'); col.className='col-md-3'; col.innerHTML=`<div class="border rounded p-2 h-100 d-flex flex-column"><img src="${r.image}" class="img-fluid mb-2" alt="${r.name}"><div class="fw-semibold small" title="${r.name}">${r.name}</div><div class="text-danger small">${Number(r.price||0).toLocaleString('vi-VN')} VND</div><div class="text-muted small">${r.area||0} m²</div></div>`; list.appendChild(col); }); if(items.length===0) list.innerHTML='<div class="col-12 text-muted">Chưa có phòng yêu thích.</div>'; } if(markHearts){ const ids=new Set(items.map(r=>r.id)); document.querySelectorAll('.fav-btn').forEach(btn=>{ const id=btn.getAttribute('data-room'); if(ids.has(id)){ btn.classList.add('active'); btn.innerHTML='<i class="fas fa-heart"></i>'; } }); } }catch(e){ console.error(e); }
@@ -170,10 +185,12 @@
                 const keyword=clone.getAttribute('data-keyword')||'';
                 const min=clone.getAttribute('data-min'); const max=clone.getAttribute('data-max');
                 const minA=clone.getAttribute('data-minarea'); const maxA=clone.getAttribute('data-maxarea');
-                const url=`@Url.Action("LoadMore","Home", new { area="Renter" })?skip=${loaded}&keyword=${encodeURIComponent(keyword)}&minPrice=${min}&maxPrice=${max}&minArea=${minA}&maxArea=${maxA}`;
+                const owner=ownerInput?.value?.trim()||'';
+                const occ=currentOccupants();
+                const url=`@Url.Action("LoadMore","Home", new { area="Renter" })?skip=${loaded}&keyword=${encodeURIComponent(keyword)}&minPrice=${min}&maxPrice=${max}&minArea=${minA}&maxArea=${maxA}&owner=${encodeURIComponent(owner)}&maxOccupants=${occ??''}`;
                 clone.disabled=true; clone.innerHTML='Đang tải...';
                 try{ const res=await fetch(url); if(!res.ok) throw 0; const data=await res.json(); if(!data || data.count===0){ finalizeNoMore(clone); return; }
-                    const grid=document.getElementById('room-grid'); data.items.forEach(r=>{ const card=document.createElement('div'); card.className='col-lg-3 col-md-4 col-sm-6 room-item'; card.innerHTML=`<div class=\"room-card\"><div class=\"room-img-wrapper\"><a href=\"/Renter/Room/Detail/${r.id}\"><img src=\"${r.mainImage}\" class=\"room-img\" alt=\"${r.name}\"/></a><span class=\"room-badge\"><i class=\"fas fa-check-circle\"></i> ${r.status}</span></div><div class=\"room-info\"><div class=\"d-flex justify-content-between align-items-start\"><div class=\"room-title\" title=\"${r.name}\">${r.name}</div><button class=\"fav-btn inline-fav\" data-room=\"${r.id}\"><i class=\"far fa-heart\"></i></button></div><div class=\"d-flex justify-content-between align-items-center mt-1\"><div class=\"room-price\">${Number(r.price).toLocaleString('vi-VN')} VND</div><div class=\"text-muted small\">${r.area} m²</div></div><div class=\"room-address\"><i class=\"fas fa-map-marker-alt me-1 text-danger\"></i> ${r.address ?? ''}</div><div class=\"mt-2 small text-muted\">Chủ trọ: <strong>${r.ownerName}</strong></div><div class=\"mt-3 d-grid\"><a href="/Renter/Room/Detail/${r.id}" class="btn btn-sm btn-outline-primary">Xem chi tiết</a></div></div></div>`; grid.appendChild(card); });
+                    const grid=document.getElementById('room-grid'); data.items.forEach(r=>{ const card=document.createElement('div'); card.className='col-lg-3 col-md-4 col-sm-6 room-item'; card.innerHTML=`<div class=\"room-card\"><div class=\"room-img-wrapper\"><a href=\"/Renter/Room/Detail/${r.id}\"><img src=\"${r.mainImage}\" class=\"room-img\" alt=\"${r.name}\"/></a><span class=\"room-badge\"><i class=\"fas fa-check-circle\"></i> ${r.status}</span></div><div class=\"room-info\"><div class=\"d-flex justify-content-between align-items-start\"><div class=\"room-title\" title=\"${r.name}\">${r.name}</div><button class=\"fav-btn inline-fav\" data-room=\"${r.id}\"><i class=\"far fa-heart\"></i></button></div><div class=\"d-flex justify-content-between align-items-center mt-1\"><div class=\"room-price\">${Number(r.price).toLocaleString('vi-VN')} VND</div><div class=\"text-muted small\">${r.area} m²</div></div><div class=\"room-address\"><i class=\"fas fa-map-marker-alt me-1 text-danger\"></i> ${r.address ?? ''}</div><div class=\"mt-2 small text-muted\">Chủ trọ: <strong>${r.ownerName}</strong></div><div class=\"mt-3 d-grid\"><a href=\"/Renter/Room/Detail/${r.id}\" class=\"btn btn-sm btn-outline-primary\">Xem chi tiết</a></div></div></div>`; grid.appendChild(card); });
                     const newLoaded=loaded+data.count; clone.setAttribute('data-loaded', newLoaded); wireFavButtons(); loadFavorites(false); if(newLoaded>=total) finalizeNoMore(clone); else { clone.disabled=false; clone.innerHTML='Xem thêm'; }
                 }catch(e){ console.error(e); clone.disabled=false; clone.innerHTML='Thử lại'; }
             });
@@ -181,20 +198,21 @@
         function finalizeNoMore(btn){ btn.disabled=true; btn.classList.remove('btn-outline-secondary'); btn.classList.add('btn-secondary'); btn.innerHTML='Đã xem hết'; }
 
         async function performFilter(){
-            const k=input.value.trim(); const price=currentPriceRange(); const area=currentAreaRange(); const params=new URLSearchParams();
-            if(k) params.append('keyword',k); if(price.min!=null) params.append('minPrice',price.min); if(price.max!=null) params.append('maxPrice',price.max); if(area.min!=null) params.append('minArea',area.min); if(area.max!=null) params.append('maxArea',area.max);
+            const k=input.value.trim(); const price=currentPriceRange(); const area=currentAreaRange(); const owner=ownerInput?.value?.trim()||''; const occ=currentOccupants();
+            const params=new URLSearchParams();
+            if(k) params.append('keyword',k); if(price.min!=null) params.append('minPrice',price.min); if(price.max!=null) params.append('maxPrice',price.max); if(area.min!=null) params.append('minArea',area.min); if(area.max!=null) params.append('maxArea',area.max); if(owner) params.append('owner', owner); if(occ!=null) params.append('maxOccupants', occ);
             const url='@Url.Action("Filter","Home", new { area="Renter" })?'+params.toString();
             try{ const res=await fetch(url); if(!res.ok) return; const data=await res.json(); const grid=document.getElementById('room-grid'); if(!grid) return; grid.innerHTML=''; const title=document.querySelector('h3.fw-bold.mb-4.text-dark'); const feat=document.querySelector('.featured-room'); if(feat) feat.closest('section').style.display='none';
                 if(data.items.length===0){ if(title) title.innerHTML='Không có phòng phù hợp với yêu cầu tìm kiếm này'; grid.innerHTML='<div class="col-12 text-muted">Không có phòng phù hợp với yêu cầu tìm kiếm này</div>'; const lw=document.getElementById('load-more-wrapper'); if(lw) lw.innerHTML=''; return; }
                 if(title) title.innerHTML='Danh sách các phòng phù hợp:';
                 data.items.forEach(r=>{ const card=document.createElement('div'); card.className='col-lg-3 col-md-4 col-sm-6 room-item'; card.innerHTML=`<div class=\"room-card\"><div class=\"room-img-wrapper\"><a href=\"/Renter/Room/Detail/${r.id}\"><img src=\"${r.mainImage}\" class=\"room-img\" alt=\"${r.name}\"/></a><span class=\"room-badge\"><i class=\"fas fa-check-circle\"></i> ${r.status}</span></div><div class=\"room-info\"><div class=\"d-flex justify-content-between align-items-start\"><div class=\"room-title\" title=\"${r.name}\">${r.name}</div><button class=\"fav-btn inline-fav\" data-room=\"${r.id}\"><i class=\"far fa-heart\"></i></button></div><div class=\"d-flex justify-content-between align-items-center mt-1\"><div class=\"room-price\">${Number(r.price).toLocaleString('vi-VN')} VND</div><div class=\"text-muted small\">${r.area} m²</div></div><div class=\"room-address\"><i class=\"fas fa-map-marker-alt me-1 text-danger\"></i> ${r.address ?? ''}</div><div class=\"mt-2 small text-muted\">Chủ trọ: <strong>${r.ownerName}</strong></div><div class=\"mt-3 d-grid\"><a href="/Renter/Room/Detail/${r.id}" class="btn btn-sm btn-outline-primary">Xem chi tiết</a></div></div></div>`; grid.appendChild(card); });
-                const lw=document.getElementById('load-more-wrapper'); if(lw){ if(data.total>data.items.length){ lw.innerHTML=`<button id="btn-load-more" class="btn btn-outline-secondary px-4" data-loaded="${data.items.length}" data-total="${data.total}" data-keyword="${k}" data-min="${price.min ?? ''}" data-max="${price.max ?? ''}" data-minarea="${area.min ?? ''}" data-maxarea="${area.max ?? ''}">Xem thêm</button>`; setupLoadMore(); } else lw.innerHTML=''; }
+                const lw=document.getElementById('load-more-wrapper'); if(lw){ lw.innerHTML=''; }
                 wireFavButtons(grid); loadFavorites(false);
             }catch(e){ console.error(e); }
         }
 
         function schedule(){ clearTimeout(debounceTimer); debounceTimer=setTimeout(performFilter,delay); }
-        input.addEventListener('input', schedule); priceSelect.addEventListener('change', performFilter); areaSelect.addEventListener('change', performFilter); resetBtn.addEventListener('click', e=>{ e.preventDefault(); input.value=''; priceSelect.value=''; areaSelect.value=''; performFilter(); });
+        input.addEventListener('input', schedule); priceSelect.addEventListener('change', performFilter); areaSelect.addEventListener('change', performFilter); ownerInput.addEventListener('input', schedule); occSelect.addEventListener('change', performFilter); resetBtn.addEventListener('click', e=>{ e.preventDefault(); input.value=''; priceSelect.value=''; areaSelect.value=''; ownerInput.value=''; occSelect.value=''; performFilter(); });
 
         // initial wiring
         wireFavButtons(); loadFavorites(); setupLoadMore();

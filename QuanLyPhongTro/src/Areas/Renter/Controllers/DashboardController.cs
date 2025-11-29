@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+Ôªøusing Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyPhongTro.Data;
 using QuanLyPhongTro.src.Models.ViewModels;
@@ -23,7 +23,7 @@ namespace QuanLyPhongTro.Areas.Renter.Controllers
             if(pid == null) return RedirectToAction("Login","Auth", new { area="Renter" });
             var contract = await _db.Contracts.Include(c=>c.IdRoomNavigation).FirstOrDefaultAsync(c=>c.IdRenter==pid && c.Status=="Active");
             if(contract == null){ return View("NoRoom"); }
-            var unpaidBills = await _db.Bills.Where(b=>b.IdPerson==pid && (b.Status=="Ch?a thanh to·n" || b.Status=="Pending") ).ToListAsync();
+            var unpaidBills = await _db.Bills.Where(b=>b.IdPerson==pid && (b.Status=="Ch∆∞a thanh to√°n" || b.Status=="Pending") ).ToListAsync();
             var vm = new RenterDashboardViewModel{
                 ContractId = contract.Id,
                 RoomId = contract.IdRoom ?? Guid.Empty,
@@ -47,11 +47,11 @@ namespace QuanLyPhongTro.Areas.Renter.Controllers
         public async Task<IActionResult> PayAll(){
             var pid = CurrentPersonId();
             if(pid == null) return Unauthorized();
-            var bills = await _db.Bills.Where(b=>b.IdPerson==pid && (b.Status=="Ch?a thanh to·n" || b.Status=="Pending")).ToListAsync();
+            var bills = await _db.Bills.Where(b=>b.IdPerson==pid && (b.Status=="Ch∆∞a thanh to√°n" || b.Status=="Pending")).ToListAsync();
             if(!bills.Any()) return RedirectToAction(nameof(Index));
-            foreach(var b in bills){ b.Status = "?„ thanh to·n"; b.PaymentDate = DateTime.UtcNow; }
+            foreach(var b in bills){ b.Status = "ƒê√£ thanh to√°n"; b.PaymentDate = DateTime.UtcNow; }
             await _db.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Thanh to·n th‡nh cÙng";
+            TempData["SuccessMessage"] = "Thanh to√°n th√†nh c√¥ng";
             return RedirectToAction(nameof(Index));
         }
 
@@ -98,7 +98,7 @@ namespace QuanLyPhongTro.Areas.Renter.Controllers
             var report = new Report{ IdReporter = pid, IdRoom = contract.IdRoom, Title = input.Title, Description = input.Description, DateCreated = DateTime.UtcNow, Status = "Pending" };
             _db.Reports.Add(report);
             await _db.SaveChangesAsync();
-            TempData["SuccessMessage"] = "?„ g?i thÙng b·o/ b·o c·o t?i ch? tr?";
+            TempData["SuccessMessage"] = "ƒê√£ g·ª≠i th√¥ng b√°o/ b√°o c√°o ƒë·∫øn ch·ªß tr·ªç";
             return RedirectToAction(nameof(Index));
         }
     }

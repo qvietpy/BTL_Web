@@ -33,6 +33,9 @@ public partial class Room
     [StringLength(255)]
     public string? Description { get; set; }
 
+    // New: capacity (number of tenants allowed)
+    public int MaxOccupants { get; set; } = 2;
+
     [InverseProperty("IdRoomNavigation")]
     public virtual ICollection<Bill> Bills { get; set; } = new List<Bill>();
 

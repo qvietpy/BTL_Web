@@ -1,91 +1,275 @@
-@model QuanLyPhongTro.src.Models.ViewModels.RenterDashboardViewModel
+﻿@model QuanLyPhongTro.src.Models.ViewModels.RenterDashboardViewModel
+@using System.Globalization
 @{
-    ViewData["Title"] = "B?ng ?i?u khi?n";
+    ViewData["Title"] = "Bảng điều khiển";
     Layout = "_LayoutRenter";
+
+    // Logic tính toán ngày tháng
     DateTime? startDt = Model.ContractStart.HasValue ? Model.ContractStart.Value.ToDateTime(TimeOnly.MinValue) : null;
     DateTime? endDt = Model.ContractEnd.HasValue ? Model.ContractEnd.Value.ToDateTime(TimeOnly.MinValue) : null;
+    
     var totalDays = (endDt.HasValue && startDt.HasValue) ? (endDt.Value - startDt.Value).TotalDays : 0;
     var leftDays = endDt.HasValue ? (endDt.Value - DateTime.Now).TotalDays : 0;
-    var progress = totalDays>0 ? Math.Max(0, Math.Min(100, (int)(((totalDays - leftDays)/totalDays)*100))) : 0;
+    var progress = totalDays > 0 ? Math.Max(0, Math.Min(100, (int)(((totalDays - leftDays) / totalDays) * 100))) : 0;
+    
+    // Format tiền tệ Việt Nam
+    var cultureInfo = new CultureInfo("vi-VN");
 }
-<h3 class="mb-4"><i class="fas fa-home me-2"></i>Ph�ng c?a t�i</h3>
-@if(TempData["SuccessMessage"]!=null){<div class="alert alert-success">@TempData["SuccessMessage"]</div>}
-<div class="row g-3 mb-3">
-  <div class="col-sm-6 col-lg-3">
-    <div class="card shadow-sm h-100"><div class="card-body"><h6 class="text-muted mb-1">Ti?n c?n tr?</h6><h4 class="text-danger mb-0">@Model.OutstandingAmount.ToString("N0") ?</h4></div></div>
-  </div>
-  <div class="col-sm-6 col-lg-3">
-    <div class="card shadow-sm h-100"><div class="card-body"><h6 class="text-muted mb-1">??t c?c</h6><h4 class="mb-0">@Model.Deposit?.ToString("N0") ?</h4></div></div>
-  </div>
-  <div class="col-sm-6 col-lg-3">
-    <div class="card shadow-sm h-100"><div class="card-body"><h6 class="text-muted mb-1">C�n l?i h?p ??ng</h6><h4 class="mb-0">@(leftDays<0?0:Math.Round(leftDays)) ng�y</h4></div></div>
-  </div>
-  <div class="col-sm-6 col-lg-3">
-    <div class="card shadow-sm h-100"><div class="card-body"><h6 class="text-muted mb-1">Ti?n ?? h?p ??ng</h6><div class="progress" style="height:22px"><div class="progress-bar" role="progressbar" style="width:@progress%">@progress%</div></div></div></div>
-  </div>
-</div>
-<div class="row">
-  <div class="col-lg-6">
-    <div class="card shadow-sm mb-3">
-      <div class="card-body">
-        <h5 class="card-title d-flex justify-content-between align-items-center">@Model.RoomName <span class="badge bg-info">@Model.RoomStatus</span></h5>
-        <p class="text-muted mb-2"><i class="fas fa-map-marker-alt me-1 text-danger"></i>@Model.RoomAddress</p>
-        <div class="row small mb-2">
-          <div class="col-6">Di?n t�ch: <strong>@Model.RoomArea m�</strong></div>
-          <div class="col-6">Gi�: <strong>@Model.RoomPrice?.ToString("N0") ? / th�ng</strong></div>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold text-primary mb-0"><i class="fas fa-columns me-2"></i>Tổng quan</h3>
+        <span class="badge bg-light text-dark border">
+            <i class="far fa-calendar-alt me-1"></i> @DateTime.Now.ToString("dd/MM/yyyy")
+        </span>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 border-start border-success border-4">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-        <div class="row small mb-2">
-          <div class="col-6">B?t ??u: <strong>@Model.ContractStart?.ToString("dd/MM/yyyy")</strong></div>
-          <div class="col-6">K?t th�c: <strong>@Model.ContractEnd?.ToString("dd/MM/yyyy")</strong></div>
+    }
+
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="card stat-card shadow-sm h-100 border-start border-4 border-danger">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-muted text-uppercase small fw-bold mb-1">Tiền cần trả</h6>
+                            <h4 class="text-danger fw-bold mb-0">@Model.OutstandingAmount.ToString("N0") đ</h4>
+                        </div>
+                        <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <p class="small mb-1">Tr?ng th�i h?p ??ng: <span class="badge bg-success">@Model.ContractStatus</span></p>
-        <p class="small mb-2">??t c?c: <strong>@Model.Deposit?.ToString("N0") ?</strong></p>
-        <a asp-action="Contract" class="btn btn-outline-primary btn-sm"><i class="fas fa-file-contract me-1"></i>Chi ti?t h?p ??ng</a>
-      </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <div class="card stat-card shadow-sm h-100 border-start border-4 border-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-muted text-uppercase small fw-bold mb-1">Đã đặt cọc</h6>
+                            <h4 class="text-dark fw-bold mb-0">@(Model.Deposit?.ToString("N0") ?? "0") đ</h4>
+                        </div>
+                        <div class="stat-icon bg-info bg-opacity-10 text-info">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <div class="card stat-card shadow-sm h-100 border-start border-4 border-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-muted text-uppercase small fw-bold mb-1">Hợp đồng còn</h6>
+                            <h4 class="text-dark fw-bold mb-0">@(leftDays < 0 ? 0 : Math.Round(leftDays)) <span class="fs-6 text-muted">ngày</span></h4>
+                        </div>
+                        <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <div class="card stat-card shadow-sm h-100 border-start border-4 border-success">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-2">Tiến độ thuê</h6>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: @progress%"></div>
+                    </div>
+                    <div class="mt-2 text-end small fw-bold text-success">@progress% hoàn thành</div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h5 class="card-title"><i class="fas fa-paper-plane me-2"></i>G?i th�ng b�o / b�o c�o</h5>
-        <p class="small text-muted mb-2">B?n c� th? g?i ph?n h?i s? c? t?i ch? tr?.</p>
-        <a asp-action="SendNotice" class="btn btn-warning btn-sm"><i class="fas fa-exclamation-triangle me-1"></i>G?i th�ng b�o</a>
-      </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm mb-4 border-0">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="card-title mb-0 d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-primary"><i class="fas fa-door-open me-2"></i>@Model.RoomName</span>
+                        <span class="badge bg-success rounded-pill">@Model.RoomStatus</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">
+                        <i class="fas fa-map-marker-alt me-2 text-danger"></i>@Model.RoomAddress
+                    </p>
+                    
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <div class="p-2 bg-light rounded">
+                                <small class="text-muted d-block">Diện tích</small>
+                                <strong>@Model.RoomArea m²</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 bg-light rounded">
+                                <small class="text-muted d-block">Giá thuê</small>
+                                <strong class="text-primary">@Model.RoomPrice?.ToString("N0") đ/tháng</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 bg-light rounded">
+                                <small class="text-muted d-block">Bắt đầu</small>
+                                <strong>@Model.ContractStart?.ToString("dd/MM/yyyy")</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 bg-light rounded">
+                                <small class="text-muted d-block">Kết thúc</small>
+                                <strong>@Model.ContractEnd?.ToString("dd/MM/yyyy")</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                        <span class="small text-muted">Trạng thái HĐ: <span class="fw-bold text-dark">@Model.ContractStatus</span></span>
+                        <a asp-area="Renter" asp-controller="Contracts" asp-action="My" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                            <i class="fas fa-file-signature me-1"></i> Xem tất cả HĐ
+                        </a>
+                        <a asp-area="Renter" asp-controller="Dashboard" asp-action="Contract" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                            <i class="fas fa-file-signature me-1"></i> Gia hạn HĐ
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 bg-primary bg-opacity-10">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <h5 class="card-title fw-bold text-primary mb-1"><i class="fas fa-headset me-2"></i>Hỗ trợ & Báo cáo</h5>
+                        <p class="small text-muted mb-0">Gửi phản hồi sự cố hoặc yêu cầu hỗ trợ đến chủ trọ.</p>
+                    </div>
+                    <a asp-area="Renter" asp-controller="Dashboard" asp-action="SendNotice" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                        <i class="fas fa-paper-plane me-1"></i> Gửi ngay
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0 fw-bold"><i class="fas fa-file-invoice-dollar me-2 text-warning"></i>Hóa đơn chưa thanh toán</h5>
+                    @if (Model.OutstandingAmount > 0)
+                    {
+                        @* Giả sử PayAll nằm ở BillsController *@
+                        <form asp-area="Renter" asp-controller="Bills" asp-action="PayAll" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-success btn-sm fw-bold shadow-sm">
+                                <i class="fas fa-wallet me-1"></i> Thanh toán tất cả
+                            </button>
+                        </form>
+                    }
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.UnpaidBills.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Mã HĐ</th>
+                                        <th>Số tiền</th>
+                                        <th>Trạng thái</th>
+                                        <th class="text-end pe-4">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var b in Model.UnpaidBills)
+                                    {
+                                        <tr>
+                                            <td class="ps-4 font-monospace small">#@b.Id.ToString().Substring(0, 8)</td>
+                                            <td class="fw-bold text-danger">@b.Amount.ToString("N0") đ</td>
+                                            <td><span class="badge bg-warning text-dark">@b.Status</span></td>
+                                            <td class="text-end pe-4">
+                                                <form asp-area="Renter" asp-controller="Bills" asp-action="Pay" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@b.Id" />
+                                                    <button class="btn btn-outline-success btn-sm rounded-circle" title="Thanh toán ngay" style="width: 32px; height: 32px; padding: 0;">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <div class="mb-3 text-success opacity-50">
+                                <i class="fas fa-check-circle fa-4x"></i>
+                            </div>
+                            <h6 class="fw-bold text-success">Tuyệt vời!</h6>
+                            <p class="text-muted small">Bạn không còn hóa đơn nào chưa thanh toán.</p>
+                        </div>
+                    }
+                </div>
+                <div class="card-footer bg-white text-center py-3 border-top">
+                    <a asp-area="Renter" asp-controller="Bills" asp-action="Index" class="btn btn-link text-decoration-none text-secondary btn-sm">
+                        Xem lịch sử hóa đơn <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-  <div class="col-lg-6">
-    <div class="card shadow-sm mb-3">
-      <div class="card-body">
-        <h5 class="card-title d-flex justify-content-between align-items-center"><span><i class="fas fa-wallet me-2"></i>H�a ??n</span>@if(Model.OutstandingAmount>0){<form asp-action="PayAll" method="post" class="d-inline">@Html.AntiForgeryToken()<button type="submit" class="btn btn-success btn-sm"><i class="fas fa-credit-card me-1"></i>Thanh to�n t?t c?</button></form>}</h5>
-        @if(Model.UnpaidBills.Any()){
-          <div class="table-responsive small">
-            <table class="table table-sm table-hover align-middle">
-              <thead class="table-light"><tr><th>M�</th><th>S? ti?n</th><th>Tr?ng th�i</th><th></th></tr></thead>
-              <tbody>
-              @foreach(var b in Model.UnpaidBills){
-                <tr>
-                  <td>@b.Id.ToString().Substring(0,8)</td>
-                  <td>@b.Amount.ToString("N0") ?</td>
-                  <td>@b.Status</td>
-                  <td class="text-end">
-                    <form asp-area="Renter" asp-controller="Bills" asp-action="Pay" method="post" class="d-inline">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@b.Id" /><button class="btn btn-outline-success btn-sm" title="Thanh to�n"><i class="fas fa-check"></i></button></form>
-                  </td>
-                </tr>
-              }
-              </tbody>
-            </table>
-          </div>
-          <a asp-area="Renter" asp-controller="Bills" asp-action="Index" class="btn btn-outline-secondary btn-sm"><i class="fas fa-list me-1"></i>T?t c? h�a ??n</a>
-        } else {<div class="alert alert-success p-2 mb-2 small"><i class="fas fa-check-circle me-1"></i>Kh�ng c�n h�a ??n ch?a thanh to�n.</div> <a asp-area="Renter" asp-controller="Bills" asp-action="Index" class="btn btn-outline-secondary btn-sm">Xem l?ch s?</a>}
-      </div>
+
+    <div class="card shadow-sm border-0 mt-4">
+        <div class="card-body">
+            <h6 class="fw-bold mb-3"><i class="fas fa-info-circle me-2 text-info"></i>Thông tin cần biết</h6>
+            <div class="row text-muted small">
+                <div class="col-md-4 mb-2 mb-md-0">
+                    <i class="fas fa-check me-2 text-success"></i>Giá đã bao gồm các dịch vụ cố định (nếu có).
+                </div>
+                <div class="col-md-4 mb-2 mb-md-0">
+                    <i class="fas fa-calendar-alt me-2 text-primary"></i>Hóa đơn tạo mới hàng tháng bởi chủ trọ.
+                </div>
+                <div class="col-md-4">
+                    <i class="fas fa-phone-alt me-2 text-warning"></i>Liên hệ chủ trọ nếu cần gia hạn hợp đồng.
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h5 class="card-title"><i class="fas fa-info-circle me-2"></i>Th�ng tin th�m</h5>
-        <ul class="small mb-0">
-          <li>Gi� ?� bao g?m c�c d?ch v? c? ??nh (n?u c�).</li>
-          <li>H�a ??n t?o m?i th�ng b?i ch? tr?, b?n c� th? thanh to�n tr?c tuy?n.</li>
-          <li>Li�n h? ch? tr? n?u c?n gia h?n h?p ??ng tr??c ng�y h?t h?n.</li>
-        </ul>
-      </div>
-    </div>
-  </div>
 </div>
+<style>
+    .stat-card {
+        transition: transform 0.2s;
+        border: none;
+        border-radius: 12px;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .stat-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+    .card {
+        border-radius: 12px;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(0,0,0,.02);
+    }
+</style>

@@ -29,6 +29,30 @@ namespace QuanLyPhongTro.Areas.Owner.Controllers
             return View(rooms);
         }
 
+        [HttpGet]
+        // [GET] Owner/Room/Detail/{id}
+        public async Task<IActionResult> Detail(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                return NotFound();
+            }
+
+            var room = await _context.Rooms
+                .Include(r => r.RoomImages)      // 1. Lấy kèm hình ảnh
+                .Include(r => r.Contracts)       // 2. Lấy kèm hợp đồng
+                    .ThenInclude(c => c.IdRenterNavigation) // Lấy thông tin người thuê
+                        .ThenInclude(u => u.IdDetailNavigation) // Lấy tên chi tiết người thuê
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (room == null)
+            {
+                return NotFound();
+            }
+
+            return View(room);
+        }
+
         // POST: /Owner/Room/Create
         [HttpPost]
         [ValidateAntiForgeryToken]

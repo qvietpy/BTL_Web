@@ -38,5 +38,6 @@ namespace QuanLyPhongTro.Models
 
         [InverseProperty("IdPaymentNavigation")]
         public virtual Payment? Payment { get; set; }
+
     }
 }

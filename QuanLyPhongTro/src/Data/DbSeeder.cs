@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using QuanLyPhongTro.Models;
 using System.Text.RegularExpressions;
 
@@ -19,42 +19,42 @@ namespace QuanLyPhongTro.Data
                     new Room
                     {
                         Id = Guid.NewGuid(),
-                        Name = "Ph�ng 101 - Qu?n 1",
-                        Address = "123 L� T? Tr?ng, Q1, TP.HCM",
+                        Name = "Phòng 101 - Quận 1",
+                        Address = "123 Lý Tự Trọng, Q1, TP.HCM",
                         Area = 18,
                         Price = 3500000,
-                        Status = "Tr?ng",
-                        Description = "G?n trung t�m, c� ban c�ng, gi? gi?c t? do"
+                        Status = "Trống",
+                        Description = "Gần trung tâm, có ban công, giờ giấc tự do"
                     },
                     new Room
                     {
                         Id = Guid.NewGuid(),
-                        Name = "Ph�ng 202 - Qu?n 7",
-                        Address = "45 Nguy?n Th? Th?p, Q7, TP.HCM",
+                        Name = "Phòng 202 - Quận 7",
+                        Address = "45 Nguyễn Trãi, Q7, TP.HCM",
                         Area = 22,
                         Price = 4200000,
                         Status = "Tr?ng",
-                        Description = "Full n?i th?t, c� m�y l?nh"
+                        Description = "Full nôi thất"
                     },
                     new Room
                     {
                         Id = Guid.NewGuid(),
-                        Name = "Ph�ng 303 - Th? �?c",
-                        Address = "12 V� Van Ng�n, TP. Th? �?c",
+                        Name = "Phòng 303 - Th? Ð?c",
+                        Address = "12 Võ Van Ngân, TP. Thủ Đức",
                         Area = 16,
                         Price = 2800000,
-                        Status = "Tr?ng",
-                        Description = "G?n �H, an ninh t?t"
+                        Status = "Tróng",
+                        Description = "Gần ÐH, an ninh tốt"
                     },
                     new Room
                     {
                         Id = Guid.NewGuid(),
-                        Name = "Ph�ng 404 - B�nh Th?nh",
-                        Address = "89 �i?n Bi�n Ph?, Q. B�nh Th?nh",
+                        Name = "Phòng 404 - Bình Thạnh",
+                        Address = "89 Ðiện Biên Phủ",
                         Area = 20,
                         Price = 3900000,
-                        Status = "Tr?ng",
-                        Description = "C� ch? d? xe, thang m�y"
+                        Status = "Trống",
+                        Description = "Có chỗ để xe, thang máy"
                     }
                 };
 

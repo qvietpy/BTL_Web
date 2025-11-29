@@ -1,0 +1,46 @@
+﻿@model QuanLyPhongTro.Models.Room
+@{
+    ViewData["Title"] = "Chi tiết phòng";
+    Layout = "_LayoutOwner";
+}
+<div class="container py-4">
+    <a href="/Owner/Dashboard/Index" class="btn btn-link"><i class="fas fa-arrow-left me-1"></i>Quay lại</a>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h4 class="mb-2 text-primary">@Model.Name</h4>
+            <p class="text-muted mb-3"><i class="fas fa-map-marker-alt me-1 text-danger"></i>@Model.Address</p>
+            <div class="row mb-3">
+                <div class="col-md-4">Diện tích: <strong>@(Model.Area ?? 0) m²</strong></div>
+                <div class="col-md-4">Giá: <strong>@(Model.Price ?? 0).ToString("N0") đ/tháng</strong></div>
+                <div class="col-md-4">Trạng thái: <span class="badge bg-secondary">@Model.Status</span></div>
+            </div>
+            <p>@Model.Description</p>
+            <hr />
+            <h6 class="mb-2">Hình ảnh</h6>
+            <div class="row g-2">
+                @foreach(var img in Model.RoomImages){
+                    <div class="col-6 col-md-3"><img src="@img.ImageUrl" class="img-fluid rounded" alt="@Model.Name" /></div>
+                }
+            </div>
+            <hr />
+            <h6 class="mb-2">Hợp đồng</h6>
+            @if(Model.Contracts.Any()){
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light"><tr><th>Người thuê</th><th>Bắt đầu</th><th>Kết thúc</th><th>Trạng thái</th></tr></thead>
+                        <tbody>
+                        @foreach(var c in Model.Contracts){
+                            <tr>
+                                <td>@(c.IdRenterNavigation?.IdDetailNavigation?.Name ?? c.IdRenterNavigation?.Username)</td>
+                                <td>@c.StartDate?.ToString("dd/MM/yyyy")</td>
+                                <td>@c.EndDate?.ToString("dd/MM/yyyy")</td>
+                                <td>@c.Status</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            } else {<div class="alert alert-info">Chưa có hợp đồng cho phòng này.</div>}
+        </div>
+    </div>
+</div>

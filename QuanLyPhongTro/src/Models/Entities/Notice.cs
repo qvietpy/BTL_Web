@@ -13,14 +13,16 @@ public partial class Notice
     [Key]
     public Guid Id { get; set; }
 
-    [StringLength(200)]
+    [Required(ErrorMessage = "Tiêu đề không được để trống")]
+    [StringLength(200, ErrorMessage = "Tiêu đề không quá 200 ký tự")]
     public string? Title { get; set; }
 
+    [Required(ErrorMessage = "Nội dung không được để trống")]
     public string? Description { get; set; }
 
     public byte[]? Image { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; } = DateTime.Now;
 
     public string? Status { get; set; } = "Chưa đọc";
 

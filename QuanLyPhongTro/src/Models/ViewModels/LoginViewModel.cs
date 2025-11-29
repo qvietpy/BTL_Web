@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace QuanLyPhongTro.ViewModels
+namespace QuanLyPhongTro.src.Models.ViewModels
 {
     public class LoginViewModel
     {

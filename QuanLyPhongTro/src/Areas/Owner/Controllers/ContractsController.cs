@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyPhongTro.Data;
 using System.Threading.Tasks;
@@ -26,12 +26,12 @@ namespace QuanLyPhongTro.Areas.Owner.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ApproveExtension(Guid id){
             var c = await _db.Contracts.FirstOrDefaultAsync(x=>x.Id==id);
-            if(c==null){ TempData["ErrorMessage"]="Kh�ng t�m th?y h?p ??ng"; return RedirectToAction(nameof(Index)); }
-            if(!(c.ExtensionStatus?.Equals("Pending", StringComparison.OrdinalIgnoreCase) ?? false) || c.RequestedExtensionMonths==null){ TempData["ErrorMessage"]="Kh�ng c� y�u c?u gia h?n"; return RedirectToAction(nameof(Index)); }
+            if(c==null){ TempData["ErrorMessage"]="Không tìm thấy hợp đồng"; return RedirectToAction(nameof(Index)); }
+            if(!(c.ExtensionStatus?.Equals("Pending", StringComparison.OrdinalIgnoreCase) ?? false) || c.RequestedExtensionMonths==null){ TempData["ErrorMessage"]="Không có yêu cầu gia hạn"; return RedirectToAction(nameof(Index)); }
             if(c.EndDate.HasValue){ c.EndDate = c.EndDate.Value.AddMonths(c.RequestedExtensionMonths.Value); }
             c.ExtensionStatus = "Approved"; c.RequestedExtensionMonths = null; // reset after apply
             await _db.SaveChangesAsync();
-            TempData["SuccessMessage"]="?� duy?t gia h?n h?p ??ng";
+            TempData["SuccessMessage"]="Đã duyệt yêu cầu gia hạn hợp đồng";
             return RedirectToAction(nameof(Index));
         }
 
@@ -39,11 +39,11 @@ namespace QuanLyPhongTro.Areas.Owner.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RejectExtension(Guid id){
             var c = await _db.Contracts.FirstOrDefaultAsync(x=>x.Id==id);
-            if(c==null){ TempData["ErrorMessage"]="Kh�ng t�m th?y h?p ??ng"; return RedirectToAction(nameof(Index)); }
-            if(!(c.ExtensionStatus?.Equals("Pending", StringComparison.OrdinalIgnoreCase) ?? false)){ TempData["ErrorMessage"]="Kh�ng c� y�u c?u gia h?n"; return RedirectToAction(nameof(Index)); }
+            if(c==null){ TempData["ErrorMessage"]="Không tìm thấy hợp đồng"; return RedirectToAction(nameof(Index)); }
+            if(!(c.ExtensionStatus?.Equals("Pending", StringComparison.OrdinalIgnoreCase) ?? false)){ TempData["ErrorMessage"]="Không có yêu c?u gia h?n"; return RedirectToAction(nameof(Index)); }
             c.ExtensionStatus = "Rejected"; c.RequestedExtensionMonths = null;
             await _db.SaveChangesAsync();
-            TempData["SuccessMessage"]="?� t? ch?i y�u c?u gia h?n";
+            TempData["SuccessMessage"]="Đã từ chối yêu cầu gia hạn";
             return RedirectToAction(nameof(Index));
         }
     }

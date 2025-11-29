@@ -1,24 +1,55 @@
 ﻿@model QuanLyPhongTro.Models.Notice
 @{
-    ViewData["Title"] = "Tạo thông báo";
+    ViewData["Title"] = "Tạo thông báo mới";
     Layout = "_LayoutOwner";
 }
-<h3 class="mb-3"><i class="fas fa-plus me-2"></i>Tạo thông báo</h3>
-<form asp-area="Owner" asp-controller="Notice" asp-action="Create" method="post" class="card shadow-sm">
-  @Html.AntiForgeryToken()
-  <div class="card-body">
-    <div class="mb-3">
-      <label class="form-label">Tiêu đề</label>
-      <input asp-for="Title" class="form-control" />
-      <span asp-validation-for="Title" class="text-danger"></span>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-pen-nib me-2"></i>Soạn thông báo mới</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-area="Owner" asp-controller="Notice" asp-action="Create" method="post" class="card shadow-sm">
+                        @Html.AntiForgeryToken()
+                        
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="mb-4">
+                            <label asp-for="Title" class="form-label fw-bold text-secondary">Tiêu đề thông báo <span class="text-danger">*</span></label>
+                            <input asp-for="Title" class="form-control form-control-lg" placeholder="Ví dụ: Thông báo cắt điện, Nhắc đóng tiền..." required />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label fw-bold text-secondary">Nội dung chi tiết <span class="text-danger">*</span></label>
+                            <textarea asp-for="Description" rows="6" class="form-control" placeholder="Nhập nội dung đầy đủ của thông báo..." required></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+                        
+                        @* <div class="mb-4">
+                            <label class="form-label fw-bold text-secondary">Hình ảnh đính kèm</label>
+                            <input type="file" name="fileImage" class="form-control" />
+                        </div> 
+                        *@
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4 me-md-2">
+                                <i class="fas fa-arrow-left me-1"></i> Hủy bỏ
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4 fw-bold shadow-sm">
+                                <i class="fas fa-paper-plane me-1"></i> Gửi thông báo
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="mb-3">
-      <label class="form-label">Nội dung</label>
-      <textarea asp-for="Description" rows="5" class="form-control"></textarea>
-      <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-success">Lưu</button>
-    <a asp-action="Index" class="btn btn-secondary ms-2">Hủy</a>
-  </div>
-</form>
-@section Scripts{<partial name="_ValidationScriptsPartial" />}
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

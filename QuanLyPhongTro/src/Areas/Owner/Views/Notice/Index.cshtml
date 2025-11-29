@@ -1,33 +1,100 @@
 ﻿@model IEnumerable<QuanLyPhongTro.Models.Notice>
 @{
-    ViewData["Title"] = "Thông báo";
+    ViewData["Title"] = "Quản lý thông báo";
     Layout = "_LayoutOwner";
 }
-<h3 class="mb-3"><i class="fas fa-bell me-2"></i>Thông báo</h3>
-@if(TempData["SuccessMessage"]!=null){<div class="alert alert-success">@TempData["SuccessMessage"]</div>}
-<div class="mb-3 text-end">
-  <a asp-area="Owner" asp-controller="Notice" asp-action="Create" class="btn btn-primary"><i class="fas fa-plus me-1"></i>Tạo thông báo</a>
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center my-4">
+        <h3 class="fw-bold text-primary"><i class="fas fa-bell me-2"></i>Danh sách thông báo</h3>
+        <a asp-area="Owner" asp-controller="Notice" asp-action="Create" class="btn btn-primary">
+    <i class="fas fa-plus me-1"></i>Tạo thông báo
+</a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white py-3">
+            <i class="fas fa-table me-1"></i>
+            Lịch sử thông báo
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="ps-3">Tiêu đề</th>
+                            <th>Nội dung tóm tắt</th>
+                            <th>Ngày tạo</th>
+                            <th>Trạng thái</th>
+                            <th class="text-end pe-3">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var n in Model)
+                            {
+                                <tr>
+                                    <td class="ps-3 fw-bold text-primary">@n.Title</td>
+                                    <td>
+                                        <span class="text-muted small">
+                                            @(n.Description?.Length > 50 ? n.Description.Substring(0, 50) + "..." : n.Description)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="small">@n.CreatedAt?.ToString("dd/MM/yyyy")</div>
+                                        <div class="x-small text-muted">@n.CreatedAt?.ToString("HH:mm")</div>
+                                    </td>
+                                    <td>
+                                        @if (n.Status == "Chưa đọc")
+                                        {
+                                            <span class="badge bg-warning text-dark"><i class="fas fa-envelope me-1"></i>Chưa đọc</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success"><i class="fas fa-check-double me-1"></i>Đã đọc</span>
+                                        }
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        @if (n.Status == "Chưa đọc")
+                                        {
+                                            <form asp-area="Owner" asp-controller="Notice" asp-action="MarkRead" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@n.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-success" title="Đánh dấu đã đọc">
+                                                    <i class="fas fa-check"></i> <span class="d-none d-md-inline">Đã đọc</span>
+                                                </button>
+                                            </form>
+                                        }
+                                        @* <button class="btn btn-sm btn-outline-danger ms-1"><i class="fas fa-trash"></i></button> *@
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="fas fa-inbox fa-3x mb-3 opacity-50"></i>
+                                    <p>Chưa có thông báo nào được tạo.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
-<div class="card shadow-sm">
-  <div class="table-responsive">
-    <table class="table table-hover align-middle">
-      <thead class="table-light"><tr><th>Tiêu đề</th><th>Ngày tạo</th><th>Trạng thái</th><th></th></tr></thead>
-      <tbody>
-      @if(Model!=null && Model.Any()){
-        @foreach(var n in Model){
-          <tr>
-            <td>@n.Title</td>
-            <td>@n.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</td>
-            <td>@n.Status</td>
-            <td class="text-end">
-              @if(n.Status=="Ch?a ??c"){
-                <form asp-area="Owner" asp-controller="Notice" asp-action="MarkRead" method="post" class="d-inline">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@n.Id" /><button class="btn btn-sm btn-success">Đánh dấu đã đọc</button></form>
-              }
-            </td>
-          </tr>
-        }
-      } else {<tr><td colspan="4" class="text-center text-muted">Không có thông báo.</td></tr>}
-      </tbody>
-    </table>
-  </div>
-</div>
+
+<style>
+    .x-small { font-size: 0.75rem; }
+</style>

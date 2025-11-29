@@ -26,8 +26,12 @@ namespace QuanLyPhongTro.Areas.Owner.Controllers
             var roomsQuery = _context.Rooms
                 .Include(r => r.RoomImages)
                 .Include(r => r.Contracts)
+                    .ThenInclude(c => c.IdRenterNavigation)
+                        .ThenInclude(p => p.IdDetailNavigation)
                 .Where(r => ownerId == null || r.IdOwner == ownerId);
+
             var rooms = await roomsQuery.ToListAsync();
+
             int totalRooms = rooms.Count;
             int rentedRooms = rooms.Count(r => r.Status == "Rented" || r.Contracts.Any(c => c.Status == "Active"));
             int emptyRooms = rooms.Count(r => r.Status == "Empty" || (string.IsNullOrEmpty(r.Status)));
@@ -36,6 +40,7 @@ namespace QuanLyPhongTro.Areas.Owner.Controllers
             int pendingRequests = await _context.BookingRequests.CountAsync(b => (ownerId==null || b.Room.IdOwner==ownerId) && b.Status == "Pending");
             decimal monthlyRevenue = rooms.Where(r => r.Contracts.Any(c => c.Status == "Active"))
                                           .Sum(r => r.Price ?? 0);
+
             ViewBag.TotalRooms = totalRooms;
             ViewBag.RentedRooms = rentedRooms;
             ViewBag.EmptyRooms = emptyRooms;

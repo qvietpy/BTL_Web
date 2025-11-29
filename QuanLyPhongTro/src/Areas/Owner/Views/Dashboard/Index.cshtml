@@ -59,7 +59,12 @@
                 else {<span class="badge bg-warning text-dark">Trống</span>}
             </td>
             <td>@(activeContract?.IdRenterNavigation?.IdDetailNavigation?.Name ?? "-")</td>
-            <td><a asp-area="Owner" asp-controller="Room" asp-action="Detail" asp-route-id="@r.Id" class="btn btn-sm btn-outline-primary">Chi tiết</a></td>
+            
+            <td>
+    <a href="/Owner/Room/Detail?id=@r.Id" class="btn btn-sm btn-outline-primary">
+    Chi tiết
+</a>
+</td>
         </tr>
     }
     </tbody>

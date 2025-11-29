@@ -82,15 +82,18 @@ namespace QuanLyPhongTro.src.Services
         }
 
         private List<RoomViewModel> MapRooms(IEnumerable<Room> rooms) => rooms.Select(MapRoom).ToList();
+
         private RoomViewModel MapRoom(Room r) => new RoomViewModel
         {
             Id = r.Id,
             Name = r.Name,
             Address = r.Address ?? string.Empty,
             Price = r.Price ?? 0,
-            Area = (double)(r.Area ?? 0),
+            Area = (decimal)(r.Area ?? 0),
             Status = r.Status ?? string.Empty,
             Description = r.Description ?? string.Empty,
+            MaxOccupants = r.MaxOccupants,
+
             MainImage = r.RoomImages.OrderBy(i => i.ImageUrl).FirstOrDefault()?.ImageUrl ?? "/images/no-image.svg",
             AllImages = r.RoomImages.Select(i => i.ImageUrl!).ToList(),
             OwnerName = r.IdOwnerNavigation?.IdDetailNavigation?.Name ?? r.IdOwnerNavigation?.Username ?? "Chủ trọ"

@@ -1,0 +1,237 @@
+﻿@model QuanLyPhongTro.src.Models.ViewModels.RoomDetailViewModel
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background: #f5f5f5;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .detail-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        .image-gallery img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .price-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .info-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .service-item {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+            .service-item:last-child {
+                border-bottom: none;
+            }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="@Url.Action("Index", "Renter")">
+                <i class="fas fa-home me-2"></i>Quản lý Phòng Trọ
+            </a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="@Url.Action("Index", "Renter")">Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="@Url.Action("Rooms", "Renter")">Tìm phòng</a></li>
+                    <li class="nav-item"><a class="nav-link" href="@Url.Action("MyContracts", "Renter")">Hợp đồng</a></li>
+                    <li class="nav-item"><a class="nav-link" href="@Url.Action("Logout", "Auth")">Đăng xuất</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <a href="@Url.Action("Rooms", "Renter")" class="btn btn-secondary mb-3">
+            <i class="fas fa-arrow-left me-2"></i>Quay lại
+        </a>
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="fas fa-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <div class="row">
+            <!-- Cột trái: Hình ảnh và mô tả -->
+            <div class="col-md-8">
+                <div class="detail-card">
+                    <h2 class="mb-3">@Model.Name</h2>
+                    <p class="text-muted mb-4">
+                        <i class="fas fa-map-marker-alt me-2 text-danger"></i>@Model.Address
+                    </p>
+
+                    <!-- Gallery -->
+                    <div class="image-gallery mb-4">
+                        @if (Model.ImageUrls.Any())
+                        {
+                            <div id="roomCarousel" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-inner">
+                                    @for (int i = 0; i < Model.ImageUrls.Count; i++)
+                                    {
+                                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                                            <img src="@Model.ImageUrls[i]" alt="Hình @(i+1)" />
+                                        </div>
+                                    }
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#roomCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon"></span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#roomCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon"></span>
+                                </button>
+                            </div>
+                        }
+                        else
+                        {
+                            <img src="https://via.placeholder.com/800x400?text=No+Image" alt="No Image" />
+                        }
+                    </div>
+
+                    <!-- Thông tin chi tiết -->
+                    <h4 class="mb-3"><i class="fas fa-info-circle me-2"></i>Thông tin chi tiết</h4>
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="info-item">
+                                <i class="fas fa-expand-arrows-alt text-primary me-2"></i>
+                                <strong>Diện tích:</strong> @Model.Area m²
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-item">
+                                <i class="fas fa-users text-success me-2"></i>
+                                <strong>Số người:</strong> Tối đa @Model.MaxOccupants người
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-item">
+                                <i class="fas fa-check-circle text-info me-2"></i>
+                                <strong>Trạng thái:</strong> @Model.Status
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3"><i class="fas fa-file-alt me-2"></i>Mô tả</h5>
+                    <p class="text-justify">@Model.Description</p>
+
+                    <!-- Dịch vụ -->
+                    <h5 class="mb-3 mt-4"><i class="fas fa-list me-2"></i>Dịch vụ</h5>
+                    <div class="detail-card">
+                        @foreach (var service in Model.Services)
+                        {
+                            <div class="service-item">
+                                <div class="d-flex justify-content-between">
+                                    <span><i class="fas fa-check text-success me-2"></i>@service.Name</span>
+                                    <span class="text-muted">@service.PricePerUnit.ToString("N0") đ/@service.Unit</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Form đặt phòng -->
+            <div class="col-md-4">
+                <div class="detail-card sticky-top" style="top: 20px;">
+                    <div class="price-box mb-4">
+                        <h3 class="mb-0">@Model.Price.ToString("N0") đ</h3>
+                        <small>/ tháng</small>
+                    </div>
+
+                    <!-- Thông tin chủ nhà -->
+                    <h5 class="mb-3"><i class="fas fa-user me-2"></i>Thông tin chủ nhà</h5>
+                    <div class="info-item mb-3">
+                        <p class="mb-2"><strong>Họ tên:</strong> @Model.OwnerName</p>
+                        <p class="mb-2"><strong>Số điện thoại:</strong> @Model.OwnerPhone</p>
+                        <p class="mb-0"><strong>Email:</strong> @Model.OwnerEmail</p>
+                    </div>
+
+                    <!-- Form đặt phòng -->
+                    <h5 class="mb-3"><i class="fas fa-paper-plane me-2"></i>Gửi yêu cầu thuê</h5>
+                    <form asp-action="RequestRental" asp-controller="Renter" method="post">
+                        <input type="hidden" name="RoomId" value="@Model.Id" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Ngày bắt đầu *</label>
+                            <input type="date" name="StartDate" class="form-control"
+                                   value="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ngày kết thúc *</label>
+                            <input type="date" name="EndDate" class="form-control"
+                                   value="@DateTime.Now.AddMonths(6).ToString("yyyy-MM-dd")" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Tiền đặt cọc (VNĐ) *</label>
+                            <input type="number" name="Deposit" class="form-control"
+                                   value="@((Model.Price * 1).ToString("0"))" required />
+                            <small class="text-muted">Khuyến nghị: 1 tháng tiền phòng</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ghi chú</label>
+                            <textarea name="Note" class="form-control" rows="3"
+                                      placeholder="Thời gian muốn xem phòng, yêu cầu đặc biệt..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i>Gửi yêu cầu
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Yêu cầu sẽ được gửi đến chủ nhà để xét duyệt
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -3,22 +3,103 @@
     ViewData["Title"] = "Gửi thông báo";
     Layout = "_LayoutRenter";
 }
-<h3 class="mb-3"><i class="fas fa-paper-plane me-2"></i>Gửi thông báo</h3>
-<form asp-action="SendNotice" method="post" class="card shadow-sm">
-  @Html.AntiForgeryToken()
-  <div class="card-body">
-    <div class="mb-3">
-      <đề class="form-label">Tiêu đề<label>
-      <input asp-for="Title" class="form-control" />
-      <span class="text-danger" asp-validation-for="Title"></span>
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header text-white p-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h4 class="mb-0">
+                        <i class="fas fa-paper-plane me-2"></i> Gửi Thông Báo Mới
+                    </h4>
+                </div>
+
+                <div class="card-body p-4">
+                    <form asp-action="SendNotice" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="Title" class="form-label fw-bold">
+                                <i class="fas fa-heading text-primary me-1"></i> Tiêu đề
+                            </label>
+                            <div class="input-group">
+                                <input asp-for="Title" class="form-control" placeholder="Nhập vấn đề hiện tại của bạn" required />
+                            </div>
+                            <span class="text-danger small" asp-validation-for="Title"></span>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="Description" class="form-label fw-bold">
+                                <i class="fas fa-file-alt text-primary me-1"></i> Nội dung chi tiết
+                            </label>
+                            <textarea asp-for="Description" class="form-control" rows="6" 
+                                      placeholder="Nhập nội dung thông báo của bạn tại đây..." required></textarea>
+                            <small class="form-text text-muted mt-2">
+                                <i class="fas fa-info-circle me-1"></i> Vui lòng trình bày rõ ràng để quản lý có thể hỗ trợ tốt nhất.
+                            </small>
+                            <span class="text-danger small" asp-validation-for="Description"></span>
+                        </div>
+
+                        <div class="alert alert-light border-start border-primary border-4 mb-4" role="alert">
+                            <strong><i class="fas fa-clock"></i> Lưu ý:</strong> Thông báo của bạn sẽ được gửi đến ban quản lý và phản hồi sớm nhất có thể.
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary flex-grow-1 py-2 fw-bold" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                                <i class="fas fa-paper-plane me-2"></i> Gửi Ngay
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary py-2 px-4">
+                                <i class="fas fa-times me-2"></i> Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="mb-3">
-      <label class="form-label">Nội dung</label>
-      <textarea asp-for="Description" class="form-control" rows="5"></textarea>
-      <span class="text-danger" asp-validation-for="Description"></span>
-    </div>
-    <button type="submit" class="btn btn-warning"><i class="fas fa-paper-plane me-1"></i>Gửi</button>
-    <a asp-action="Index" class="btn btn-secondary ms-2">Quay lại</a>
-  </div>
-</form>
-@section Scripts{ <partial name="_ValidationScriptsPartial" /> }
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Validation phía Client giống code mẫu
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const title = document.querySelector('[name="Title"]').value.trim();
+            const description = document.querySelector('[name="Description"]').value.trim();
+
+            if (title.length < 5) {
+                alert('Tiêu đề phải có ít nhất 5 ký tự');
+                e.preventDefault();
+                // Focus vào ô lỗi
+                document.querySelector('[name="Title"]').focus();
+                return false;
+            }
+
+            if (description.length < 10) {
+                alert('Nội dung phải có ít nhất 10 ký tự');
+                e.preventDefault();
+                document.querySelector('[name="Description"]').focus();
+                return false;
+            }
+        });
+    </script>
+}
+
+<style>
+    /* Custom CSS để ghi đè hoặc bổ sung */
+    .form-control:focus {
+        border-color: #764ba2;
+        box-shadow: 0 0 0 0.25rem rgba(118, 75, 162, 0.25);
+    }
+    
+    .card {
+        border-radius: 15px;
+        overflow: hidden; /* Để header bo góc theo card */
+    }
+    
+    .form-label {
+        color: #4a5568;
+    }
+</style>

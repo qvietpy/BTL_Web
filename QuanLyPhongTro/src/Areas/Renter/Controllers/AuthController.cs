@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using QuanLyPhongTro.Data;
-using QuanLyPhongTro.ViewModels; // corrected namespace
+using QuanLyPhongTro.src.Models.ViewModels; // for LoginViewModel and RegisterViewModel
 using QuanLyPhongTro.Models;
 using System;
 using System.Threading.Tasks;

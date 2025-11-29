@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyPhongTro.Data;
 using System.Security.Claims;
@@ -54,14 +54,14 @@ namespace QuanLyPhongTro.Areas.Renter.Controllers
         public async Task<IActionResult> RequestExtension(Guid id, int months)
         {
             var pid = CurrentPersonId(); if(pid==null) return Unauthorized();
-            if(months <1 || months >36){ TempData["ErrorMessage"]="S? th�ng gia h?n ph?i 1-36"; return RedirectToAction("Contract","Dashboard"); }
+            if(months <1 || months >36){ TempData["ErrorMessage"]="Số tháng gia hạn phải từ 1-36"; return RedirectToAction("Contract","Dashboard"); }
             var c = await _db.Contracts.FirstOrDefaultAsync(x=>x.Id==id && x.IdRenter==pid && x.Status=="Active");
-            if(c==null){ TempData["ErrorMessage"]="Kh�ng t�m th?y h?p ??ng"; return RedirectToAction("Contract","Dashboard"); }
-            if(c.ExtensionStatus=="Pending"){ TempData["ErrorMessage"]="?� c� y�u c?u gia h?n ?ang ch? duy?t"; return RedirectToAction("Contract","Dashboard"); }
+            if(c==null){ TempData["ErrorMessage"]="Không tìm thấy hợp đồng"; return RedirectToAction("Contract","Dashboard"); }
+            if(c.ExtensionStatus=="Pending"){ TempData["ErrorMessage"]="Đã có yêu cầu gia hạn đang chờ duyệt. Vui lòng chờ chủ trọ duyệt xong."; return RedirectToAction("Contract","Dashboard"); }
             c.RequestedExtensionMonths = months;
             c.ExtensionStatus = "Pending";
             await _db.SaveChangesAsync();
-            TempData["SuccessMessage"]="?� g?i y�u c?u gia h?n";
+            TempData["SuccessMessage"]="Đã gửi yêu cầu gia hạn";
             return RedirectToAction("Contract","Dashboard");
         }
     }

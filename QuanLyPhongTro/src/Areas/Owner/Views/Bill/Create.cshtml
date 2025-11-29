@@ -1,33 +1,220 @@
 ﻿@{
     ViewData["Title"] = "Tạo hóa đơn";
     Layout = "_LayoutOwner";
-    var rooms = ViewBag.Rooms as List<QuanLyPhongTro.Models.Room> ?? new();
-    var renters = ViewBag.Renters as List<QuanLyPhongTro.Models.Person> ?? new();
+    var contractSelect = ViewBag.ContractSelect as List<SelectListItem> ?? new();
+    var contractsJson = ViewBag.ContractsJson ?? "[]";
 }
+
 <h3 class="mb-3"><i class="bi bi-plus-circle me-2"></i>Tạo hóa đơn</h3>
+
 <form asp-action="Create" method="post" class="card shadow-sm">
-  @Html.AntiForgeryToken()
-  <div class="card-body">
-    <div class="mb-3">
-      <label class="form-label">Phòng</label>
-      <select name="roomId" class="form-select" required>
-        <option value="">-- Chọn phòng --</option>
-        @foreach(var r in rooms){ <option value="@r.Id">@r.Name (@r.Address)</option> }
-      </select>
+    @Html.AntiForgeryToken()
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <!-- Thông tin chung -->
+                <div class="mb-3">
+                    <label class="form-label">Mã hóa đơn</label>
+                    <input asp-for="InvoiceCode" class="form-control" readonly />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Hợp đồng</label>
+                    <select asp-for="ContractId" class="form-select" id="contractSelect" required>
+                        @foreach (var it in contractSelect)
+                        {
+                            <option value="@it.Value">@it.Text</option>
+                        }
+                    </select>
+                    <span asp-validation-for="ContractId" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Phòng</label>
+                    <input asp-for="RoomId" class="form-control" id="roomDisplay" readonly />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Người thuê</label>
+                    <input class="form-control" id="renterDisplay" readonly />
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Tháng</label>
+                        <input asp-for="Month" class="form-control" type="number" min="1" max="12" required />
+                        <span asp-validation-for="Month" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Năm</label>
+                        <input asp-for="Year" class="form-control" type="number" min="2000" max="2100" required />
+                        <span asp-validation-for="Year" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Hạn thanh toán</label>
+                    <input asp-for="DueDate" class="form-control" type="date" />
+                    <span asp-validation-for="DueDate" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <ul class="nav nav-tabs mb-3" id="invoiceTabs" role="tablist">
+                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-info" type="button">Thông tin</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-elec" type="button">Điện</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-water" type="button">Nước</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-svc" type="button">Dịch vụ</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-sum" type="button">Tổng kết</button></li>
+                </ul>
+
+                <div class="tab-content">
+                    <!-- Tiền phòng -->
+                    <div class="tab-pane fade show active" id="tab-info">
+                        <div class="mb-3">
+                            <label class="form-label">Tiền phòng (VND)</label>
+                            <input asp-for="Rent" class="form-control money-input" type="number" min="0" step="1000" />
+                            <span asp-validation-for="Rent" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Điện -->
+                    <div class="tab-pane fade" id="tab-elec">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Số điện đầu kì</label>
+                                <input asp-for="ElecStart" class="form-control number-input" type="number" min="0" />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Số điện cuối kì</label>
+                                <input asp-for="ElecEnd" class="form-control number-input" type="number" min="0" />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Số điện sử dụng</label>
+                                <input id="elecUsed" class="form-control" readonly />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tiền điện (VND)</label>
+                            <input asp-for="Electricity" class="form-control money-input" type="number" min="0" step="1000" />
+                        </div>
+                    </div>
+
+                    <!-- Nước -->
+                    <div class="tab-pane fade" id="tab-water">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Số nước đầu kì</label>
+                                <input asp-for="WaterStart" class="form-control number-input" type="number" min="0" />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Số nước cuối kì</label>
+                                <input asp-for="WaterEnd" class="form-control number-input" type="number" min="0" />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Số nước sử dụng</label>
+                                <input id="waterUsed" class="form-control" readonly />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tiền nước (VND)</label>
+                            <input asp-for="Water" class="form-control money-input" type="number" min="0" step="1000" />
+                        </div>
+                    </div>
+
+                    <!-- Dịch vụ -->
+                    <div class="tab-pane fade" id="tab-svc">
+                        <div class="mb-3">
+                            <label class="form-label">Phí dịch vụ: Gửi xe (VND)</label>
+                            <input asp-for="ParkingFee" class="form-control money-input" type="number" min="0" step="1000" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phí dịch vụ: Rác (VND)</label>
+                            <input asp-for="GarbageFee" class="form-control money-input" type="number" min="0" step="1000" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tổng phí dịch vụ (VND)</label>
+                            <input id="svcTotal" class="form-control" readonly />
+                        </div>
+                    </div>
+
+                    <!-- Tổng kết -->
+                    <div class="tab-pane fade" id="tab-sum">
+                        <div class="mb-3">
+                            <label class="form-label">Tổng tiền</label>
+                            <input id="totalDisplay" class="form-control" readonly />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ghi chú</label>
+                            <textarea asp-for="Note" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <input type="hidden" name="TotalMoney" id="totalMoney" />
+
+        <button type="submit" class="btn btn-success">Lưu</button>
+        <a asp-action="Index" class="btn btn-secondary ms-2">Hủy</a>
     </div>
-    <div class="mb-3">
-      <label class="form-label">Người thuê</label>
-      <select name="renterId" class="form-select" required>
-        <option value="">-- Chọn người thuê --</option>
-        @foreach(var p in renters){ <option value="@p.Id">@(p.IdDetailNavigation?.Name ?? p.Username)</option> }
-      </select>
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Tổng tiền (VND)</label>
-      <input type="number" name="totalMoney" class="form-control" min="0" step="1000" required />
-      @if(!ViewData.ModelState.IsValid){ <div class="text-danger small">@ViewData.ModelState[string.Empty]?.Errors.FirstOrDefault()?.ErrorMessage</div> }
-    </div>
-    <button type="submit" class="btn btn-success">Lưu</button>
-    <a asp-action="Index" class="btn btn-secondary ms-2">Hủy</a>
-  </div>
 </form>
+
+@section Scripts {
+    <script>
+        const contracts = @Html.Raw(contractsJson);
+
+        function updateContractInfo() {
+            const contractId = document.getElementById('contractSelect').value;
+            const contract = contracts.find(c => c.id == contractId);
+            if (contract) {
+                document.getElementById('roomDisplay').value = contract.roomName;
+                document.getElementById('renterDisplay').value = contract.renterName;
+                document.querySelector('[name="Rent"]').value = contract.rent;
+            } else {
+                document.getElementById('roomDisplay').value = '';
+                document.getElementById('renterDisplay').value = '';
+                document.querySelector('[name="Rent"]').value = 0;
+            }
+            updateTotal();
+        }
+
+        function updateUsageAndTotal() {
+            const elecStart = parseFloat(document.querySelector('[name="ElecStart"]').value) || 0;
+            const elecEnd = parseFloat(document.querySelector('[name="ElecEnd"]').value) || 0;
+            const elecUsed = Math.max(0, elecEnd - elecStart);
+            document.getElementById('elecUsed').value = elecUsed;
+            document.querySelector('[name="Electricity"]').value = elecUsed * 4000; // ví dụ 4000đ/kWh
+
+            const waterStart = parseFloat(document.querySelector('[name="WaterStart"]').value) || 0;
+            const waterEnd = parseFloat(document.querySelector('[name="WaterEnd"]').value) || 0;
+            const waterUsed = Math.max(0, waterEnd - waterStart);
+            document.getElementById('waterUsed').value = waterUsed;
+            document.querySelector('[name="Water"]').value = waterUsed * 20000; // ví dụ 20000đ/m3
+
+            // Dịch vụ
+            const parking = parseFloat(document.querySelector('[name="ParkingFee"]').value) || 0;
+            const garbage = parseFloat(document.querySelector('[name="GarbageFee"]').value) || 0;
+            document.getElementById('svcTotal').value = parking + garbage;
+
+            updateTotal();
+        }
+
+        function updateTotal() {
+            const rent = parseFloat(document.querySelector('[name="Rent"]').value) || 0;
+            const elec = parseFloat(document.querySelector('[name="Electricity"]').value) || 0;
+            const water = parseFloat(document.querySelector('[name="Water"]').value) || 0;
+            const svc = parseFloat(document.querySelector('[name="ParkingFee"]').value) || 0
+                        + parseFloat(document.querySelector('[name="GarbageFee"]').value) || 0;
+            const total = rent + elec + water + svc;
+            document.getElementById('totalDisplay').value = total.toLocaleString();
+            document.getElementById('totalMoney').value = total;
+        }
+
+        document.getElementById('contractSelect').addEventListener('change', updateContractInfo);
+        document.querySelectorAll('.money-input, .number-input').forEach(el => el.addEventListener('input', updateUsageAndTotal));
+
+        // init
+        updateContractInfo();
+    </script>
+}
